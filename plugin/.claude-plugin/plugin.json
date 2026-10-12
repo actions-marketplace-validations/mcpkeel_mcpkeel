@@ -3,31 +3,58 @@
   "displayName": "mcpkeel",
   "version": "0.1.0",
   "description": "Checks this project's MCP servers against mcp.lock when a session starts, and asks before, or blocks, calls to a server that changed.",
-  "author": { "name": "Gabriel", "email": "hello@mcpkeel.app", "url": "https://mcpkeel.app" },
+  "author": {
+    "name": "Gabriel",
+    "email": "hello@mcpkeel.app",
+    "url": "https://mcpkeel.app"
+  },
   "homepage": "https://mcpkeel.app",
   "repository": "https://github.com/mcpkeel/mcpkeel",
   "license": "MIT",
-  "keywords": ["mcp", "security", "lockfile", "supply-chain", "tool-poisoning"],
+  "keywords": [
+    "mcp",
+    "security",
+    "lockfile",
+    "supply-chain",
+    "tool-poisoning"
+  ],
+  "icon": "./assets/icon.svg",
+  "documentationUrl": "https://github.com/mcpkeel/mcpkeel/blob/main/plugin/README.md",
+  "supportUrl": "https://github.com/mcpkeel/mcpkeel/issues",
+  "privacyPolicyUrl": "https://mcpkeel.app/privacy",
   "userConfig": {
     "on_drift": {
       "type": "string",
       "title": "When a server changed",
       "description": "What happens to a call to a tool of a server that no longer matches mcp.lock: ask you first, deny it, or only warn at session start.",
-      "options": ["ask", "deny", "warn"],
+      "options": [
+        "ask",
+        "deny",
+        "warn"
+      ],
       "default": "ask"
     },
     "on_unverified": {
       "type": "string",
       "title": "When a server could not be checked",
       "description": "What happens to a call to a server mcpkeel could not reach or finish checking.",
-      "options": ["allow", "ask", "deny"],
+      "options": [
+        "allow",
+        "ask",
+        "deny"
+      ],
       "default": "allow"
     },
     "fail_on": {
       "type": "string",
       "title": "Lowest severity that counts",
       "description": "Changes below this severity are reported but do not gate a server.",
-      "options": ["critical", "high", "medium", "low"],
+      "options": [
+        "critical",
+        "high",
+        "medium",
+        "low"
+      ],
       "default": "low"
     },
     "timeout": {
