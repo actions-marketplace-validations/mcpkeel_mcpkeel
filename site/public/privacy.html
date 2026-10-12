@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy | mcpkeel</title>
+<meta name="description" content="What mcpkeel, its GitHub Action, its plugins for Claude Code and Codex, and this website collect: nothing about you.">
+<link rel="canonical" href="https://mcpkeel.app/privacy">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="masthead wrap">
+  <a class="wordmark" href="/" aria-label="mcpkeel home">
+    <svg viewBox="0 0 32 32" width="26" height="26" aria-hidden="true"><path d="M3 7 Q16 27 29 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M16 17 V30" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+    <span>mcpkeel</span>
+  </a>
+</header>
+<main class="wrap page">
+  <h1>Privacy</h1>
+  <p class="lede">mcpkeel collects nothing about you. It has no account, no telemetry and no server of its own.</p>
+  <p class="fine">Last updated 2026-10-12. This page covers the mcpkeel command-line tool, its GitHub Action, its plugins for Claude Code and Codex, and this website.</p>
+
+  <h2>The command-line tool</h2>
+  <ul class="plain">
+    <li>It runs on your machine or in your CI. It reads your MCP config and <code>mcp.lock</code>, and writes <code>mcp.lock</code> and the reports you ask for.</li>
+    <li>It starts the MCP servers in your config, or connects to the remote ones, to read what they tell an agent.</li>
+    <li>For servers started through <code>npx</code>, <code>uvx</code>, <code>pipx</code> or <code>docker</code>, it asks the npm registry, PyPI or the image's registry which release will run. <code>--no-resolve</code> turns this off.</li>
+    <li>Only with <code>--explain</code>, it sends the changed tool definitions, and nothing else, to the review endpoint you choose, with the key you provide. Your config, environment values and headers are never sent.</li>
+    <li>It does not send anything to the mcpkeel project.</li>
+  </ul>
+
+  <h2>The GitHub Action</h2>
+  <ul class="plain">
+    <li>It runs the same tool inside your own workflow, on GitHub's runners or yours. What it reads, writes and contacts is the same as above, plus the job summary and the pull requests it opens in your repository.</li>
+  </ul>
+
+  <h2>The plugins for Claude Code and Codex</h2>
+  <ul class="plain">
+    <li>They run the same tool on your machine when a session starts, and keep one small record per project, with each server's name, status and change codes, in the plugin's data directory on your machine.</li>
+    <li>They do not use the model review and send nothing beyond what the tool itself contacts.</li>
+  </ul>
+
+  <h2>This website</h2>
+  <ul class="plain">
+    <li>It has no cookies, no analytics and no third-party scripts or fonts. It is served by Cloudflare, which processes requests to deliver it, as any host does.</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>Questions about privacy: <a href="mailto:hello@mcpkeel.app">hello@mcpkeel.app</a>.</p>
+</main>
+</body>
+</html>

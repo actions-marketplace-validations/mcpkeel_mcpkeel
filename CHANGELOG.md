@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.4.0
+
+### Added
+
+- A plugin for Claude Code, installed with `/plugin install mcpkeel --marketplace mcpkeel/mcpkeel`. When a session starts, it checks the project's MCP servers against `mcp.lock`; when the agent calls a tool of a server that changed, it asks first, or blocks the call, as configured. The agent is told which servers changed, never their changed text. `/mcpkeel:verify` checks again and `/mcpkeel:review` shows the changes for a person to accept. The plugin pins the mcpkeel it runs in its own lockfile.
+- The same plugin for Codex, from this repository's Codex marketplace. Codex cannot ask before a tool call, so there the plugin blocks.
+- A nightly drift canary: nine popular public MCP servers from npm and PyPI, started without a pinned version and compared with the night before. Results are kept in the `canary-data` branch.
+- A privacy page at mcpkeel.app/privacy.
+
+### Changed
+
+- The model review is described as model-agnostic everywhere: Claude by default, or any OpenAI-compatible endpoint, including a local one.
+- The release workflow also creates the GitHub release, with the version's CHANGELOG section as its notes.
+
 ## 0.3.0
 
 ### Added

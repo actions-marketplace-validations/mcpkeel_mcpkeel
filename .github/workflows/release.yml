@@ -2,8 +2,8 @@ name: Release
 
 # Publishes to npm when a version tag is pushed:
 #
-#   npm version 0.3.0 --no-git-tag-version   # or edit package.json
-#   git commit -am "Release 0.3.0" && git tag v0.3.0 && git push --follow-tags
+#   npm version 0.4.0 --no-git-tag-version   # or edit package.json
+#   git commit -am "Release 0.4.0" && git tag v0.4.0 && git push --follow-tags
 #
 # Publishing uses npm trusted publishing: npm verifies that the request comes
 # from this workflow in this repository, so there is no token to store, leak or
