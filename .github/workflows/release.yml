@@ -14,13 +14,15 @@ on:
   push:
     tags: ["v*"]
 
-permissions:
-  contents: read
-  id-token: write # lets npm verify the workflow's identity
+# Each job asks for what it needs and nothing more.
+permissions: {}
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # lets npm verify the workflow's identity
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -36,5 +38,26 @@ jobs:
           version="$(node -p "require('./package.json').version")"
           test "v${version}" = "${GITHUB_REF_NAME}" || { echo "::error::Tag ${GITHUB_REF_NAME} does not match package.json version ${version}"; exit 1; }
           grep -q "default: \"${version}\"" action.yml || { echo "::error::action.yml does not default to mcpkeel ${version}"; exit 1; }
+          grep -qx "## ${version}" CHANGELOG.md || { echo "::error::CHANGELOG.md has no section for ${version}"; exit 1; }
       - run: npm test
       - run: npm publish
+
+  # The GitHub release is made once the package is on npm, in a job of its own:
+  # it is the only one that can write to the repository, and it runs no
+  # dependency code. Its notes are the version's section of CHANGELOG.md.
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v v="${version}" '$0 == "## " v { found = 1; next } /^## / { found = 0 } found' CHANGELOG.md > "${RUNNER_TEMP}/notes.md"
+          gh release create "${GITHUB_REF_NAME}" --verify-tag --title "mcpkeel ${version}" --notes-file "${RUNNER_TEMP}/notes.md"
