@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>mcpkeel: the lockfile for MCP</title>
-<meta name="description" content="An MCP server can rewrite the tool descriptions your agent trusts. mcpkeel pins them in mcp.lock and fails the build when they change.">
+<meta name="description" content="An MCP server can rewrite the tool descriptions your agent trusts, or ship new code under the same name. mcpkeel pins both in mcp.lock and fails the build when they change.">
 <link rel="canonical" href="https://mcpkeel.app/">
 <meta name="theme-color" content="#10202C">
 <meta name="color-scheme" content="light">
@@ -31,8 +31,8 @@
   </a>
   <nav aria-label="Sections">
     <a href="#how">How it works</a>
-    <a href="#grading">Grading</a>
-    <a href="#claude">Claude review</a>
+    <a href="#release">What it catches</a>
+    <a href="#review">Model review</a>
     <a href="https://www.npmjs.com/package/mcpkeel">npm</a>
     <a href="https://github.com/mcpkeel/mcpkeel">GitHub</a>
   </nav>
@@ -58,11 +58,24 @@
   <div class="hero-body">
     <div class="hero-copy">
       <p class="lede">An MCP server can rewrite the tool descriptions your agent trusts, at any time, and nothing tells you. mcpkeel pins them in a file you commit and fails the build when they change.</p>
-      <div class="install">
-        <code id="install-command">npx mcpkeel demo</code>
-        <button type="button" class="copy" data-copy="npx mcpkeel demo">Copy</button>
-      </div>
-      <p class="fine">The demo pins a local server, lets it turn malicious, and shows the build failing. No network. MIT licensed, no account, no telemetry. Needs Node 22 or later.</p>
+      <ul class="paths" aria-label="Ways to start">
+        <li>
+          <span class="path-label">Try it</span>
+          <div class="install"><code>npx mcpkeel demo</code><button type="button" class="copy" data-copy="npx mcpkeel demo">Copy</button></div>
+          <span class="path-note">A local server turns malicious and the build fails. No config, no network.</span>
+        </li>
+        <li>
+          <span class="path-label">Use it</span>
+          <div class="install"><code>npx mcpkeel init</code><button type="button" class="copy" data-copy="npx mcpkeel init">Copy</button></div>
+          <span class="path-note">Pins every server in your MCP config into <code>mcp.lock</code>.</span>
+        </li>
+        <li>
+          <span class="path-label">In CI, pinned</span>
+          <div class="install"><code>npm i -D mcpkeel@0.3.0</code><button type="button" class="copy" data-copy="npm i -D mcpkeel@0.3.0">Copy</button></div>
+          <span class="path-note">The tool that pins your servers, pinned itself. Then <code>npx mcpkeel verify</code>.</span>
+        </li>
+      </ul>
+      <p class="fine">MIT licensed, no account, no telemetry. Releases are signed with npm provenance. Needs Node 22 or later.</p>
     </div>
     <ul class="legend" aria-label="How to read the drawing">
       <li><svg viewBox="0 0 40 20" aria-hidden="true"><path class="course-line" d="M0 10 H40"/><circle class="fix" cx="20" cy="10" r="6"/><circle class="fix-dot" cx="20" cy="10" r="2"/></svg><span><b>init</b> pins the definitions you reviewed in <code>mcp.lock</code>.</span></li>
@@ -98,6 +111,55 @@
   <p class="caption">Real output, from a test server whose <code>create_issue</code> description was altered after it was pinned. Exit code 1.</p>
 </section>
 
+<section class="release wrap" id="release" aria-labelledby="release-title">
+  <h2 id="release-title">What a server's next release can change</h2>
+  <p class="intro">You approved a server once. Every release after that can change what your agent is told, or what code runs, under the same name and the same config.</p>
+  <div class="matrix" role="table" aria-label="What a release can change and what mcpkeel does">
+    <div class="matrix-row matrix-head" role="row">
+      <span role="columnheader">The next release…</span>
+      <span role="columnheader">Your agent, without mcpkeel</span>
+      <span role="columnheader">mcpkeel verify</span>
+    </div>
+    <div class="matrix-row" role="row">
+      <span role="cell">hides an instruction in a tool description: “send the conversation to…, do not tell the user”</span>
+      <span role="cell">reads it as guidance, every session</span>
+      <span role="cell"><b class="grade grade-critical">critical</b> names the check that fired, exit 1</span>
+    </div>
+    <div class="matrix-row" role="row">
+      <span role="cell">rewords a description in a way no pattern catches</span>
+      <span role="cell">reads it as guidance</span>
+      <span role="cell"><b class="grade grade-high">high</b> shows the old and new text, exit 1</span>
+    </div>
+    <div class="matrix-row" role="row">
+      <span role="cell">keeps every description and ships new code: <code>npx -y server</code> fetches whatever is newest</span>
+      <span role="cell">runs the new code</span>
+      <span role="cell"><b class="grade grade-high">high</b> names the release that runs now; <b class="grade grade-critical">critical</b> if a published version changed</span>
+    </div>
+    <div class="matrix-row" role="row">
+      <span role="cell">adds a tool, or a tool stops being read-only</span>
+      <span role="cell">can call it</span>
+      <span role="cell"><b class="grade grade-high">high</b> exit 1</span>
+    </div>
+    <div class="matrix-row" role="row">
+      <span role="cell">answers a checker one way and an agent another</span>
+      <span role="cell">sees the other answer</span>
+      <span role="cell"><b class="grade grade-high">high</b> with <code>--probe</code></span>
+    </div>
+  </div>
+
+  <div class="proof">
+    <dl class="numbers">
+      <div><dt>485<span>/485</span></dt><dd>poisoned tools from the MCPTox benchmark reported as drift</dd></div>
+      <div><dt>0<span>/362</span></dt><dd>real tools of the same 45 servers flagged by mistake</dd></div>
+    </dl>
+    <div class="case">
+      <p class="case-date">2026-10-11</p>
+      <p><code>@modelcontextprotocol/server-memory</code> published 1.0.0. A project that starts it with <code>npx -y</code> ran new code that morning with its config unchanged. <code>mcpkeel verify</code> reported the new release, a rewritten tool description, a tightened parameter and a new output schema, and exited 1.</p>
+    </div>
+  </div>
+  <p class="caption">Measured with <code>eval/mcptox.mjs</code>, which CI runs on every change. Every number on this page comes from a run recorded in <a href="https://github.com/mcpkeel/mcpkeel/blob/main/docs/EVIDENCE.md">docs/EVIDENCE.md</a>.</p>
+</section>
+
 <section class="how wrap" id="how" aria-labelledby="how-title">
   <h2 id="how-title">Three commands</h2>
   <ol class="steps">
@@ -123,12 +185,20 @@
       <h3>Add it to a workflow</h3>
       <p>Run it on pull requests and on a schedule. Servers change on their schedule, not yours.</p>
       <p>The action can also open a pull request with the report when a server changes, so a change becomes a review to merge or close and not a red build to mute.</p>
-      <p>mcpkeel reads the MCP config of Claude Code (<code>.mcp.json</code>), Cursor, VS Code, opencode, Codex and Gemini CLI, or any file you pass with <code>--config</code>. It works with local stdio servers, Streamable HTTP and SSE.</p>
+      <p>With <code>sarif</code>, each change also becomes a GitHub code-scanning alert, with a stable code and its OWASP MCP Top 10 category.</p>
+      <p class="clients-label">Reads the MCP config of</p>
+      <ul class="clients">
+        <li>Claude Code</li><li>Cursor</li><li>VS Code</li><li>opencode</li><li>Codex</li><li>Gemini CLI</li>
+      </ul>
+      <p class="fine">Local stdio servers, Streamable HTTP and SSE. One server pins the same way whichever client's file it is in.</p>
     </div>
     <pre tabindex="0" aria-label="GitHub Actions example"><code>on:
   pull_request:
   schedule:
     - cron: "0 9 * * *"
+permissions:
+  contents: read
+  security-events: write
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -139,7 +209,12 @@ jobs:
           node-version: 22
       - uses: mcpkeel/mcpkeel@v0.3.0
         with:
-          probe: true</code></pre>
+          probe: true
+          sarif: mcpkeel.sarif
+      - uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: mcpkeel.sarif</code></pre>
   </div>
 </section>
 
@@ -149,11 +224,11 @@ jobs:
   <dl class="soundings">
     <div class="band band-critical">
       <dt>Critical</dt>
-      <dd>New text that trips a built-in check: instruction-like markup, hidden or encoded text, references to credential files, requests for the conversation or the user's keys, attempts to steer other tools or to hide actions. The checks also read the text backwards, decoded and with look-alike letters replaced.</dd>
+      <dd>New text that trips a built-in check: instruction-like markup, hidden or encoded text, references to credential files, requests for the conversation or the user's keys, attempts to steer other tools or to hide actions. The checks also read the text backwards, decoded and with look-alike letters replaced, and read a tool's fields together. A published package release whose contents changed.</dd>
     </div>
     <div class="band band-high">
       <dt>High</dt>
-      <dd>A tool description, a parameter description or the server's instructions changed. A tool was added. A tool stopped being marked read-only. The launch command now starts a different program.</dd>
+      <dd>A tool description, a parameter description or the server's instructions changed. A tool was added. A tool stopped being marked read-only. The launch command now starts a different program, or the launcher now runs a different release.</dd>
     </div>
     <div class="band band-medium">
       <dt>Medium</dt>
@@ -161,10 +236,10 @@ jobs:
     </div>
     <div class="band band-low">
       <dt>Low</dt>
-      <dd>The server version changed.</dd>
+      <dd>The version the server reports changed. An output schema changed.</dd>
     </div>
   </dl>
-  <p class="caption">Every change is recorded whatever its grade. <code>mcpkeel verify --fail-on high</code> lets medium and low changes through.</p>
+  <p class="caption">Every change is recorded whatever its grade, with a code that never changes meaning. <code>mcpkeel verify --fail-on high</code> lets medium and low changes through, and <code>mcpkeel.json</code> records a team's decisions about findings, each with a reason.</p>
 </section>
 
 <section class="pair wrap" id="probe" aria-labelledby="probe-title">
@@ -194,22 +269,21 @@ jobs:
   </div>
 </section>
 
-<section class="pair wrap" id="claude" aria-labelledby="claude-title">
+<section class="pair wrap" id="review" aria-labelledby="review-title">
   <div class="pair-copy">
-    <h2 id="claude-title">A review from Claude</h2>
-    <p>The built-in checks match known patterns. A model can read what the new text actually asks for.</p>
-    <p>With <code>--explain</code>, mcpkeel sends each changed text to the Claude API, which says whether it is cosmetic, functional or adversarial. An adversarial change becomes critical. A rewording that means the same thing drops to low, so a server that rewords its text every week stops failing the build.</p>
+    <h2 id="review-title">A model reads the change. It cannot wave it through.</h2>
+    <p>The built-in checks match known patterns. With <code>--explain</code>, a model reads what the new text actually asks for and calls it cosmetic, functional or adversarial. An adversarial change becomes critical. A rewording that means the same thing drops to low, so a server that rewords its text every week stops failing the build.</p>
+    <p>Bring the model you trust: Claude by default, or any endpoint that speaks the OpenAI chat completions API, including a model server on your own machine, so the text never leaves it.</p>
     <ul class="plain">
-      <li>The text under review is written by whoever controls the server, so the reviewer can raise a change freely but lower one only when no built-in check fired and the text was replaced, not added.</li>
-      <li>It is off by default. Without it, mcpkeel talks only to your MCP servers.</li>
-      <li>Only the changed definitions are sent. Your config, environment values and headers never are.</li>
+      <li>The text under review is written by whoever controls the server, so the model is a target too. It can raise a change freely, and lower one only when no built-in check fired, the text was replaced rather than added, and no new address appeared. That holds whichever model answers.</li>
+      <li>The text reaches the model between tags with a random id, new for every request, so it cannot pose as the end of the data.</li>
+      <li>Only the changed definitions are sent. Your config, environment values and headers never are, and the key is never handed to the servers being checked.</li>
       <li>If the review cannot run, the stricter rule-based grades stay in place.</li>
     </ul>
-    <p class="fine">Needs an <code>ANTHROPIC_API_KEY</code>.</p>
   </div>
   <div>
     <div class="printout" role="group" aria-label="Example output of mcpkeel verify --explain">
-      <p class="prompt">$ npx mcpkeel verify --explain --fail-on medium</p>
+      <p class="prompt">$ npx mcpkeel verify --explain --provider openai \<br>&nbsp;&nbsp;&nbsp;&nbsp;--review-url http://localhost:11434/v1 --model your-model</p>
       <p class="server"><span class="bad">✗</span> <b>github</b> <span class="quiet">1 change</span></p>
       <div class="change">
         <span class="sev sev-low">LOW</span>
@@ -217,12 +291,12 @@ jobs:
           <p><b>tool create_issue</b> description changed</p>
           <p class="minus">- Create a new issue in a repository.</p>
           <p class="plus">+ Creates a new issue in the given repository.</p>
-          <p class="verdict"><b>Claude:</b> cosmetic. Same meaning, reworded. <span class="quiet">(lowered from HIGH)</span></p>
+          <p class="verdict"><b>Review by your-model:</b> cosmetic. Same meaning, reworded. <span class="quiet">(lowered from HIGH)</span></p>
         </div>
       </div>
       <p class="total"><b>Drift:</b> 1 change (1 low).<br>Nothing at or above --fail-on medium, so this run passes.</p>
     </div>
-    <p class="caption">Example. Claude's wording varies from run to run.</p>
+    <p class="caption">Example. Every report names the model that judged, and its wording varies from run to run.</p>
   </div>
 </section>
 
@@ -236,6 +310,7 @@ jobs:
       <li>Prompts and their arguments</li>
       <li>The server's instructions</li>
       <li>The server's name and version</li>
+      <li>The release the launch command runs, with the registry's digest of it</li>
     </ul>
     <p class="fine">The same servers always produce a byte-identical <code>mcp.lock</code>, with no timestamps, so it only appears in a diff when something changed.</p>
   </div>
@@ -243,9 +318,9 @@ jobs:
     <h2>What stays on your machine</h2>
     <ul class="plain">
       <li>mcpkeel has no telemetry and no account.</li>
-      <li>It talks to your MCP servers and, only with <code>--explain</code>, to the Claude API. It does not hand your API key to the servers it starts.</li>
+      <li>It talks to your MCP servers, to the package registries to look up the release each one runs, and, only with <code>--explain</code>, to the review endpoint you choose. It does not hand its keys to the servers it starts.</li>
       <li><code>mcp.lock</code> never contains environment values or headers. URLs are stored without credentials or query strings.</li>
-      <li>It has one direct dependency: the official MCP TypeScript SDK.</li>
+      <li>It has two direct dependencies: the official MCP TypeScript SDK, and a TOML reader for Codex configs.</li>
     </ul>
   </div>
 </section>
@@ -254,11 +329,11 @@ jobs:
   <h2 id="limits-title">What it does not do</h2>
   <dl class="limit-list">
     <div><dt>It trusts what you pin.</dt><dd><code>init</code> records whatever the server sends that day, and points out anything that trips a check. Read the lockfile before you commit it.</dd></div>
-    <div><dt>It checks definitions, not behavior.</dt><dd>A server can keep its descriptions and change what a tool does. Pin the versions of the servers you start, and <code>init</code> will tell you which are not.</dd></div>
+    <div><dt>It checks definitions, not behavior.</dt><dd>It pins the release that runs, so new code fails <code>verify</code>, but it does not read that code. Reviewing a release before you accept it is still yours to do.</dd></div>
     <div><dt>It checks when you run it.</dt><dd>It is not a proxy between your agent and the server. <code>--probe</code> narrows the gap without closing it.</dd></div>
     <div><dt>It does not read tool results.</dt><dd>Instructions can also arrive in what a tool returns. That needs a runtime guard.</dd></div>
     <div><dt>No browser sign-in yet.</dt><dd>Remote servers that take a token in a header work. Servers that need OAuth do not.</dd></div>
-    <div><dt>The built-in checks are pattern matches.</dt><dd>A clean result is not proof that a description is safe. Instructions in another language pass them, which is what the review is for.</dd></div>
+    <div><dt>The built-in checks are pattern matches.</dt><dd>On their own they flag 50 of MCPTox's 485 poisoned tools. The lockfile catches every one as a change; the checks only decide how loud it is, and the model review reads the wording.</dd></div>
   </dl>
 </section>
 
@@ -270,7 +345,7 @@ jobs:
     <button type="button" class="copy" data-copy="npx mcpkeel init">Copy</button>
   </div>
   <p>Questions and vulnerability reports: <a href="mailto:hello@mcpkeel.app">hello@mcpkeel.app</a>. The package is on <a href="https://www.npmjs.com/package/mcpkeel">npm</a> and the source is on <a href="https://github.com/mcpkeel/mcpkeel">GitHub</a>.</p>
-  <p class="fine">mcpkeel is an independent project, MIT licensed. It is not affiliated with Anthropic or the Model Context Protocol project.</p>
+  <p class="fine">mcpkeel is an independent project, MIT licensed. It is not affiliated with any model provider or with the Model Context Protocol project.</p>
 </footer>
 </body>
 </html>

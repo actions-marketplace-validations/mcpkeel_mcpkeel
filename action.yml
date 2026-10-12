@@ -28,8 +28,9 @@ inputs:
     default: low
   explain:
     description: >-
-      Have Claude read each changed text and say whether it is cosmetic, functional or adversarial.
-      Needs anthropic-api-key. Without a key the check still runs, on the built-in rules alone.
+      Have a model read each changed text and say whether it is cosmetic, functional or adversarial.
+      Claude by default with anthropic-api-key, or any OpenAI-compatible endpoint with provider, review-url and review-api-key.
+      Without a key the check still runs, on the built-in rules alone.
     default: "false"
   anthropic-api-key:
     description: Claude API key for explain. It is given to mcpkeel only, never to the MCP servers it starts.
