@@ -39,12 +39,12 @@ Options
   -l, --lockfile <path>   Lockfile to read and write (default: mcp.lock)
       --fail-on <level>   verify: lowest severity that fails the run:
                           critical, high, medium or low (default: low)
-      --explain           verify, diff: have Claude read each changed text and
+      --explain           verify, diff: have a model read each changed text and
                           say whether it is cosmetic, functional or adversarial.
                           Adversarial changes become critical. Cosmetic rewordings
                           drop to low, but never when a built-in check fired.
-                          Needs ANTHROPIC_API_KEY. Sends only the changed
-                          definitions to the Claude API.
+                          Sends only the changed definitions. Claude by default
+                          (ANTHROPIC_API_KEY), or see --provider.
       --model <id>        Model for --explain (default: ${DEFAULT_MODEL})
       --provider <name>   Reviewer for --explain: anthropic (default) or openai,
                           for any OpenAI-compatible endpoint. openai needs
@@ -685,7 +685,7 @@ function footer(
         "That cannot be accepted with `mcpkeel update`. Treat the server as untrusted until it holds still.",
     );
   }
-  if (!options.explain && unstable < changes.length) lines.push(p.dim("Add --explain to have Claude read the changed text."));
+  if (!options.explain && unstable < changes.length) lines.push(p.dim("Add --explain to have a model read the changed text."));
   return lines;
 }
 

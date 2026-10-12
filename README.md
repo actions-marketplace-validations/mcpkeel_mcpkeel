@@ -82,7 +82,7 @@ Review the changes, then run `mcpkeel update` to accept them.
 | Option | What it adds |
 | --- | --- |
 | `--probe` | Reads each server two more times, to catch servers that change their answer. See [A second reading](#a-second-reading). |
-| `--explain` | Has Claude, or another model with `--provider openai`, read each changed text and adjust its severity. See [A review from Claude](#a-review-from-claude). |
+| `--explain` | Has a model you choose read each changed text and adjust its severity: Claude by default, or any OpenAI-compatible endpoint, local ones included. See [A review by a model](#a-review-by-a-model). |
 | `--no-resolve` | Skips looking up the release each package launcher runs. See [What runs](#what-runs). |
 | `--fail-on <level>` | `verify`: the lowest severity that fails the run. The default is `low`, so any drift fails. |
 | `--report <file>` | Also appends a Markdown report to a file, for pull request bodies and job summaries. |
@@ -242,14 +242,13 @@ A different release is high. The same version with different contents is critica
 
 A version range such as `some-server@^1.0.0` cannot be pinned to one release, and `init` says so. A lockfile written before 0.3.0 has no pins; `verify` says which servers lack one, and `mcpkeel update` adds them. If a registry cannot be reached, the run is incomplete and exits `2`. `--no-resolve` turns the lookup off.
 
-## A review from Claude
+## A review by a model
 
 ```sh
-export ANTHROPIC_API_KEY=...
 npx mcpkeel verify --explain --fail-on medium
 ```
 
-`--explain` sends each changed text to the [Claude API](https://platform.claude.com), which classifies it:
+The built-in checks match known patterns. `--explain` has a model read each changed text and classify it:
 
 | Verdict | Meaning | Effect on severity |
 | --- | --- | --- |
@@ -263,37 +262,38 @@ This is what makes a noisy server livable. A remote server that rewords its inst
   LOW       tool create_issue description changed
             - Create a new issue in a repository.
             + Creates a new issue in the given repository.
-            Claude: cosmetic. Same meaning, reworded. (lowered from HIGH)
+            Review by your-model: cosmetic. Same meaning, reworded. (lowered from HIGH)
 ```
 
-The text under review is written by whoever controls the server, so the reviewer is itself a target: a description can try to talk its way down to "cosmetic". The reviewer can therefore raise a change freely, but it lowers one only when all of these hold:
+The text under review is written by whoever controls the server, so the model is itself a target: a description can try to talk its way down to "cosmetic". The model can therefore raise a change freely, but it lowers one only when all of these hold, whichever model it is:
 
 - The change replaced existing text. Added or removed text is never cosmetic.
 - No built-in check fired, on the change or on the new text.
 - The new text is not much longer than the old, and adds no new address.
-- The reviewer saw the whole text. Text over 6,000 characters is clipped, and a clipped change is never lowered.
+- The model saw the whole text. Text over 6,000 characters is clipped, and a clipped change is never lowered.
 
-Other things to know:
+### Choosing the model
 
-- It is off by default. Without `--explain`, mcpkeel talks only to your MCP servers.
-- Only the changed definitions are sent. Your config, environment values and headers are never sent.
-- If the review cannot run (no key, or the API is down), `verify` keeps the rule-based severities and says so. A missing key never loosens the gate, which matters for pull requests from forks.
-- `--model <id>` or `MCPKEEL_MODEL` chooses the model. The default is `claude-sonnet-5-5`.
-- mcpkeel does not pass `ANTHROPIC_API_KEY` on to the servers it starts.
-- The text sent for review sits between tags with a random id, new for every request, so it cannot pose as the end of the data.
-
-### Other models
-
-`--provider openai` sends the same review to any endpoint that speaks the OpenAI chat completions API: a hosted model, a gateway, or a model server on your own machine, so nothing leaves it.
+| Provider | Endpoint | Key | Model |
+| --- | --- | --- | --- |
+| `anthropic` (default) | the Claude API, or `--review-url` | `ANTHROPIC_API_KEY` | `--model`, default `claude-sonnet-5-5` |
+| `openai` | any OpenAI-compatible chat completions API: a hosted model, a gateway, or a model server on your machine | `MCPKEEL_REVIEW_API_KEY` or `OPENAI_API_KEY`; none for a local endpoint | `--model`, required |
 
 ```sh
+# A model on your own machine: the changed text never leaves it.
 npx mcpkeel verify --explain --provider openai --review-url http://localhost:11434/v1 --model <model>
 ```
 
-- `--model` is required: mcpkeel does not guess what an endpoint serves.
-- The key is read from `MCPKEEL_REVIEW_API_KEY`, then `OPENAI_API_KEY`. A local endpoint needs none. Either way, it is not passed on to the servers mcpkeel starts.
-- The prompt, the delimiter and every limit above are the same. A smaller model is easier to talk into "cosmetic", which is why lowering never depends on the model alone.
-- Reports name the model that judged each change: `Review by <model>: …`.
+`--provider`, `--review-url` and `--model` can also be set with `MCPKEEL_PROVIDER`, `MCPKEEL_REVIEW_URL` and `MCPKEEL_MODEL`. Every report names the model that judged each change.
+
+Whichever model you use:
+
+- It is off by default. Without `--explain`, mcpkeel talks only to your MCP servers and the package registries.
+- Only the changed definitions are sent. Your config, environment values and headers are never sent.
+- The text sent for review sits between tags with a random id, new for every request, so it cannot pose as the end of the data.
+- The key is never passed on to the servers mcpkeel starts, and a request to the review endpoint never follows a redirect.
+- If the review cannot run (no key, or the endpoint is down), `verify` keeps the rule-based severities and says so. A missing key never loosens the gate, which matters for pull requests from forks.
+- A smaller model is easier to talk into "cosmetic", which is why lowering never depends on the model alone.
 
 ## Decisions about findings
 
@@ -438,7 +438,7 @@ Code scanning is available on public repositories, and on private ones with GitH
 | The built-in checks flag a poisoned tool, which makes it critical | 50 of 485 (10.3%) |
 | The built-in checks flag a real tool | 0 of 362 (0%) |
 
-The checks were measured as they stand, not tuned to the benchmark. They are precise and narrow: they catch requests for credentials and secret files well, and most attacks phrased as ordinary instructions not at all. That is what the lockfile is for. A change is reported because it is a change, whatever it says, and the checks only decide how loud it is. For the wording itself, `--explain` is the second reading.
+The checks were measured as they stand, not tuned to the benchmark. They are precise and narrow: they catch requests for credentials and secret files well, and most attacks phrased as ordinary instructions not at all. That is what the lockfile is for. A change is reported because it is a change, whatever it says, and the checks only decide how loud it is. For the wording itself, `--explain` is the second reading, by a model you choose.
 
 Run it yourself with `npm run build && node eval/mcptox.mjs`. CI runs it with `--check` on every change and fails if any number gets worse.
 
