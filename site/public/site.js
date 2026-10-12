@@ -1,4 +1,3 @@
-// Copy buttons. The label says what happened and then returns to the action.
 for (const button of document.querySelectorAll("button.copy")) {
   button.addEventListener("click", async () => {
     try {

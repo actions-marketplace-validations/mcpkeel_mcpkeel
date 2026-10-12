@@ -1,13 +1,3 @@
-/*
-  mcpkeel.app
-
-  The page borrows from nautical charts, because the product is named for the
-  part of a ship that stops it drifting. Chart paper is white where the water is
-  deep and bluer as it shoals. Magenta is the overprint colour charts use for
-  hazards. Buff is land: the fixed, surveyed part. Sloping letters label water,
-  upright letters label land, so italics here mean "live, can move".
-*/
-
 @font-face {
   font-family: "Archivo";
   font-style: normal;
@@ -139,8 +129,6 @@ pre {
   left: 0;
 }
 
-/* ---------------------------------------------------------------- masthead */
-
 .masthead {
   display: flex;
   align-items: center;
@@ -178,13 +166,10 @@ pre {
   text-decoration: underline;
 }
 
-/* -------------------------------------------------------------------- hero */
-
 .hero {
   padding-top: clamp(2.5rem, 7vw, 6rem);
 }
 
-/* The headline has no descenders, so it can sit directly on the course line. */
 .hero h1 {
   font-size: clamp(2.9rem, 13.2vw, 10rem);
   font-weight: 800;
@@ -244,7 +229,6 @@ pre {
   font-weight: 500;
 }
 
-/* The one piece of motion: the track leaves the course once, on load. */
 @media (prefers-reduced-motion: no-preference) {
   .course .track {
     animation: leave-course 1.5s cubic-bezier(0.3, 0.1, 0.2, 1) 0.5s both;
@@ -313,6 +297,36 @@ pre {
   background: var(--magenta);
 }
 
+.paths {
+  margin-top: 2rem;
+  display: grid;
+  gap: 1.1rem;
+}
+.paths li {
+  display: grid;
+  grid-template-columns: 7.2rem minmax(0, auto);
+  column-gap: 1rem;
+  align-items: center;
+}
+.paths .install {
+  margin-top: 0;
+  justify-self: start;
+}
+.path-label {
+  font-weight: 750;
+  font-stretch: 78%;
+  font-size: 1.05rem;
+}
+.path-note {
+  grid-column: 2;
+  margin-top: 0.3rem;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+}
+.path-note code {
+  white-space: nowrap;
+}
+
 .fine {
   margin-top: 1.1rem;
   font-size: 0.94rem;
@@ -352,8 +366,6 @@ pre {
   color: var(--magenta);
 }
 
-/* ---------------------------------------------------------------- sections */
-
 main > section {
   padding-top: var(--section);
 }
@@ -381,9 +393,6 @@ h3 {
   max-width: 56em;
 }
 
-/* ---------------------------------------------------------------- printout */
-
-/* Terminal output set on chart paper, inside a chart's double border. */
 .printout {
   margin-top: 2.4rem;
   background: var(--white);
@@ -433,7 +442,6 @@ h3 {
   padding: 0.05rem 0.45rem;
   margin-left: -0.45rem;
 }
-/* Pinned text is land: buff. What replaced it is the hazard: magenta. */
 .printout .minus {
   background: var(--buff);
 }
@@ -461,7 +469,83 @@ h3 {
   margin-top: 1.1rem;
 }
 
-/* ------------------------------------------------------------ three commands */
+.matrix {
+  margin-top: 2.4rem;
+  border: 1px solid var(--ink);
+  background: var(--white);
+}
+.matrix-row {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr);
+  gap: 0.6rem clamp(1rem, 3vw, 2.4rem);
+  padding: 1rem clamp(1rem, 2.6vw, 2rem);
+}
+.matrix-row + .matrix-row {
+  border-top: 1px solid var(--contour);
+}
+.matrix-head {
+  background: var(--shoal-1);
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+.matrix-row span:nth-child(2) {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+.grade {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  text-transform: uppercase;
+  padding: 0.05rem 0.4rem;
+}
+.grade-critical {
+  color: var(--paper);
+  background: var(--magenta);
+}
+.grade-high {
+  background: var(--shoal-2);
+}
+
+.proof {
+  display: grid;
+  grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+  gap: clamp(1.6rem, 5vw, 4.5rem);
+  align-items: start;
+  margin-top: clamp(2.4rem, 5vw, 3.6rem);
+}
+.numbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+}
+.numbers dt {
+  font-size: clamp(3.4rem, 8vw, 5.6rem);
+  font-weight: 800;
+  font-stretch: 62%;
+  line-height: 0.9;
+  border-bottom: 3px solid var(--ink);
+  padding-bottom: 0.15rem;
+}
+.numbers dt span {
+  font-size: 0.42em;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+.numbers dd {
+  margin-top: 0.6rem;
+  max-width: 18em;
+}
+.case {
+  background: var(--buff);
+  padding: clamp(1.1rem, 2.6vw, 1.8rem);
+  border-left: 6px dotted var(--magenta);
+}
+.case-date {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
 
 .steps {
   counter-reset: step;
@@ -510,6 +594,23 @@ h3 {
   margin-top: 0.8rem;
   max-width: 34em;
 }
+.clients-label {
+  font-weight: 700;
+  margin-top: 1.4rem !important;
+}
+.clients {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.clients li {
+  border: 1px solid var(--ink);
+  background: var(--white);
+  padding: 0.25rem 0.7rem;
+  font-size: 0.94rem;
+}
+
 .ci pre {
   background: var(--white);
   border: 1px solid var(--ink);
@@ -519,9 +620,8 @@ h3 {
   overflow-x: auto;
 }
 
-/* ---------------------------------------------------------------- soundings */
-
-.grading .intro {
+.grading .intro,
+.release .intro {
   margin-top: 1.1rem;
   font-size: 1.15rem;
   max-width: 40em;
@@ -552,8 +652,7 @@ h3 {
 }
 .band-critical {
   background: var(--shoal-3);
-  /* Charts ring a hazard with a dotted danger line. */
-  border-left: 6px dotted var(--magenta);
+    border-left: 6px dotted var(--magenta);
 }
 .band-critical dt {
   color: #8f0f58;
@@ -568,13 +667,15 @@ h3 {
   background: var(--white);
 }
 
-/* ------------------------------------------------------------------- claude */
-
 .pair {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
   gap: clamp(2rem, 6vw, 6rem);
   align-items: start;
+}
+.pair-copy code,
+.ci p code {
+  white-space: nowrap;
 }
 .pair-copy p {
   margin-top: 1.1rem;
@@ -603,8 +704,6 @@ h3 {
   border-top: 2px solid var(--ink);
 }
 
-/* -------------------------------------------------------------------- facts */
-
 .facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -614,7 +713,6 @@ h3 {
 .facts h2 {
   font-size: clamp(1.7rem, 3.2vw, 2.4rem);
 }
-/* What is pinned is surveyed ground. */
 .pinned {
   background: var(--buff);
   padding: clamp(1.4rem, 3.4vw, 2.6rem);
@@ -622,8 +720,6 @@ h3 {
 .local {
   padding-block: clamp(1.4rem, 3.4vw, 2.6rem);
 }
-
-/* ------------------------------------------------------------------- limits */
 
 .limit-list {
   margin-top: 2.2rem;
@@ -639,8 +735,6 @@ h3 {
   margin-top: 0.25rem;
   max-width: 34em;
 }
-
-/* ------------------------------------------------------------------- footer */
 
 footer {
   margin-top: var(--section);
@@ -658,8 +752,6 @@ footer .fine {
   margin-top: 0.7rem;
 }
 
-/* ---------------------------------------------------------------------- 404 */
-
 .lost {
   padding-block: clamp(4rem, 14vw, 10rem);
 }
@@ -675,13 +767,12 @@ footer .fine {
   margin-top: 1.6rem;
 }
 
-/* ------------------------------------------------------------------- narrow */
-
 @media (max-width: 60rem) {
   .hero-body,
   .ci,
   .pair,
-  .facts {
+  .facts,
+  .proof {
     grid-template-columns: minmax(0, 1fr);
   }
   .hero-body {
@@ -731,6 +822,33 @@ footer .fine {
   }
   .install {
     display: flex;
+  }
+  .paths li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .path-label {
+    margin-bottom: 0.35rem;
+  }
+  .path-note {
+    grid-column: 1;
+  }
+  .matrix-head {
+    display: none;
+  }
+  .matrix-row span:nth-child(2)::before {
+    content: "Without mcpkeel: ";
+    font-style: normal;
+    font-weight: 700;
+  }
+  .matrix-row span:nth-child(3)::before {
+    content: "mcpkeel verify: ";
+    font-weight: 700;
+  }
+  .matrix-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .numbers {
+    grid-template-columns: minmax(0, 1fr);
   }
   .install code {
     flex: 1;
