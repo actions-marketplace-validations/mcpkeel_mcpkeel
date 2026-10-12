@@ -463,6 +463,12 @@ The checks were measured as they stand, not tuned to the benchmark. They are pre
 
 Run it yourself with `npm run build && node eval/mcptox.mjs`. CI runs it with `--check` on every change and fails if any number gets worse.
 
+### Drift feed
+
+Every night, CI starts nine popular public MCP servers the way most configs do, with no version pinned, and compares them with the night before. What changed is recorded, day by day, in the [`canary-data`](https://github.com/mcpkeel/mcpkeel/tree/canary-data) branch: the counts by severity and code, and mcpkeel's report for each day. The servers are in [`canary/.mcp.json`](canary/.mcp.json).
+
+The servers are third-party code at whatever version they ship that night, so they run in a job that can only read the repository, with no credentials on disk. The job that writes the feed starts no server.
+
 ## What it does not do
 
 - **It trusts what you pin.** `mcpkeel init` records whatever the server sends that day. Read the lockfile before you commit it. `init` points out anything that trips a check, and tool names that two servers share.

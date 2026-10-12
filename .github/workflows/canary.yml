@@ -1,0 +1,104 @@
+name: MCP drift canary
+
+# Every night: start popular public MCP servers at whatever version they ship
+# today, compare them with the night before, and record the result in the
+# canary-data branch.
+#
+# Servers are third-party code at their latest version, so they run in a job
+# that can read the repository and nothing else, with no credentials on disk.
+# The job that writes to the repository starts no server.
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: canary
+  cancel-in-progress: false
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Fetch the last baseline
+        run: |
+          if git ls-remote --exit-code --heads "https://github.com/${GITHUB_REPOSITORY}.git" canary-data >/dev/null; then
+            git clone --quiet --depth 1 --branch canary-data "https://github.com/${GITHUB_REPOSITORY}.git" "${RUNNER_TEMP}/data"
+          fi
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+          cache: npm
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: npm ci
+      - run: npm run build
+      - name: Read the servers
+        working-directory: canary
+        run: |
+          mkdir -p "${RUNNER_TEMP}/out"
+          if [ -f "${RUNNER_TEMP}/data/mcp.lock" ]; then
+            cp "${RUNNER_TEMP}/data/mcp.lock" mcp.lock
+            cp mcp.lock "${RUNNER_TEMP}/old.lock"
+            node ../dist/cli.js verify --timeout 90 --json > "${RUNNER_TEMP}/out/verify.json" || true
+            node ../dist/cli.js update --timeout 90 || true
+            node ../dist/cli.js diff "${RUNNER_TEMP}/old.lock" mcp.lock --json --report "${RUNNER_TEMP}/out/day.md" > "${RUNNER_TEMP}/out/diff.json"
+          else
+            node ../dist/cli.js init --timeout 90
+          fi
+          cp mcp.lock "${RUNNER_TEMP}/out/mcp.lock"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: canary
+          path: ${{ runner.temp }}/out
+          retention-days: 7
+
+  record:
+    needs: observe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: main
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: data
+          fetch-depth: 0
+      - name: Switch to the data branch
+        working-directory: data
+        run: |
+          if git ls-remote --exit-code --heads origin canary-data >/dev/null; then
+            git checkout --quiet canary-data
+          else
+            git checkout --quiet --orphan canary-data
+            git rm -r --quiet --force .
+          fi
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: canary
+          path: ${{ runner.temp }}/artifact
+      - run: node main/canary/record.mjs "${RUNNER_TEMP}/artifact" data "$(date -u +%F)"
+      - name: Commit
+        working-directory: data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to record."
+            exit 0
+          fi
+          git commit --quiet -m "Canary $(date -u +%F)"
+          git push --quiet origin canary-data
