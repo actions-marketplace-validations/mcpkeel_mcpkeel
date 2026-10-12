@@ -1,0 +1,12 @@
+{
+  "name": "mcpkeel",
+  "description": "The lockfile for MCP, inside Claude Code.",
+  "owner": { "name": "Gabriel", "email": "hello@mcpkeel.app" },
+  "plugins": [
+    {
+      "name": "mcpkeel",
+      "source": "./plugin",
+      "description": "Checks this project's MCP servers against mcp.lock when a session starts, and asks before, or blocks, calls to a server that changed."
+    }
+  ]
+}

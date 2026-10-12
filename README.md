@@ -323,6 +323,27 @@ Some findings are right and still not a problem: a file tool that documents whic
 - `reason` is required. Every change a policy touched says so, with the reason, in the terminal, in JSON, in Markdown and in SARIF.
 - A policy with an unknown code, a missing reason or a malformed entry is an error, and an entry that names a server the lockfile does not have is reported, since it does nothing.
 
+## In Claude Code
+
+mcpkeel also runs inside Claude Code, as a plugin, so a server that changed overnight is caught on a developer's machine before the agent reads it, not only in the next CI run.
+
+```
+/plugin install mcpkeel --marketplace mcpkeel/mcpkeel
+```
+
+- **When a session starts**, it runs `mcpkeel verify` on the project. If a server no longer matches `mcp.lock`, you see which one and how severe, and Claude is told not to trust that server's tool descriptions. Claude is never handed the changed text itself: that text is what is under suspicion.
+- **When Claude calls a tool** of a server that changed, the call asks you first. Set it to block instead, or only warn, in `/plugin configure mcpkeel@mcpkeel`. Servers the lockfile does not cover, and projects without one, are left alone.
+- **`/mcpkeel:review`** shows what changed, with the server's text labelled as data, and accepts it with `mcpkeel update` only when you say so. **`/mcpkeel:verify`** checks again, for example after you accept a change.
+
+The plugin runs the mcpkeel version it pins in its own lockfile, which Claude Code installs with the plugin. Nothing is fetched at session start.
+
+| Setting | Values | Default |
+| --- | --- | --- |
+| When a server changed | `ask`, `deny`, `warn` | `ask` |
+| When a server could not be checked | `allow`, `ask`, `deny` | `allow` |
+| Lowest severity that counts | `critical`, `high`, `medium`, `low` | `low` |
+| Per-server timeout | seconds | `20` |
+
 ## In CI
 
 ### GitHub Action
@@ -441,6 +462,12 @@ Code scanning is available on public repositories, and on private ones with GitH
 The checks were measured as they stand, not tuned to the benchmark. They are precise and narrow: they catch requests for credentials and secret files well, and most attacks phrased as ordinary instructions not at all. That is what the lockfile is for. A change is reported because it is a change, whatever it says, and the checks only decide how loud it is. For the wording itself, `--explain` is the second reading, by a model you choose.
 
 Run it yourself with `npm run build && node eval/mcptox.mjs`. CI runs it with `--check` on every change and fails if any number gets worse.
+
+### Drift feed
+
+Every night, CI starts nine popular public MCP servers the way most configs do, with no version pinned, and compares them with the night before. What changed is recorded, day by day, in the [`canary-data`](https://github.com/mcpkeel/mcpkeel/tree/canary-data) branch: the counts by severity and code, and mcpkeel's report for each day. The servers are in [`canary/.mcp.json`](canary/.mcp.json).
+
+The servers are third-party code at whatever version they ship that night, so they run in a job that can only read the repository, with no credentials on disk. The job that writes the feed starts no server.
 
 ## What it does not do
 

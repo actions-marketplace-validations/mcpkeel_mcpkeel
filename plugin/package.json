@@ -1,0 +1,10 @@
+{
+  "name": "mcpkeel-claude-code-plugin",
+  "private": true,
+  "type": "module",
+  "description": "Runtime dependency of the mcpkeel Claude Code plugin, pinned and locked.",
+  "license": "MIT",
+  "dependencies": {
+    "mcpkeel": "0.3.0"
+  }
+}

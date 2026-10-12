@@ -354,3 +354,40 @@ test("the README lists every code", () => {
   const readme = readFileSync(join(root, "README.md"), "utf8");
   for (const code of codes) if (!/MK[12]00/.test(code)) assert.match(readme, new RegExp(`\\| \`${code}\` \\|`), code);
 });
+
+test("the canary records a day's changes, keeps the baseline, and builds the feed from counts", async () => {
+  const { mkdtempSync, writeFileSync: write, readFileSync: readFile, existsSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { execFileSync } = await import("node:child_process");
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const artifact = mkdtempSync(join(tmpdir(), "canary-art-"));
+  const data = mkdtempSync(join(tmpdir(), "canary-data-"));
+  write(join(artifact, "mcp.lock"), '{"lockfileVersion":1,"servers":{}}\n');
+  write(join(artifact, "day.md"), "## mcpkeel: 2 changes\n");
+  write(join(artifact, "verify.json"), JSON.stringify({ servers: [{ name: "memory", status: "drift", serverInfo: { version: "1.0.0" } }], incomplete: [] }));
+  write(
+    join(artifact, "diff.json"),
+    JSON.stringify({
+      changes: [
+        { server: "memory", severity: "high", rule: "MK112", owasp: "MCP03:2025", kind: "tool.description.changed" },
+        { server: "mem](http://x)", severity: "low", rule: "MK105", kind: "server.version.changed" },
+        { server: "bogus", severity: "<b>", rule: "MK1", kind: "x" },
+      ],
+    }),
+  );
+  const run = (date) => execFileSync(process.execPath, [join(root, "canary", "record.mjs"), artifact, data, date], { encoding: "utf8" });
+  assert.match(run("2026-10-12"), /2026-10-12: 2 change\(s\) recorded, 1 server\(s\) checked\./);
+  const day = JSON.parse(readFile(join(data, "history", "2026-10-12.json"), "utf8"));
+  assert.deepEqual(day.bySeverity, { critical: 0, high: 1, medium: 0, low: 1 });
+  assert.deepEqual(day.servers, ["mem__http_//x_", "memory"]);
+  assert.ok(existsSync(join(data, "history", "2026-10-12.md")));
+  assert.ok(existsSync(join(data, "mcp.lock")));
+  const readme = readFile(join(data, "README.md"), "utf8");
+  assert.match(readme, /\| \[2026-10-12\]\(history\/2026-10-12\.md\) \| 2 \(1 high, 1 low\) \| `mem__http_\/\/x_`, `memory` \|/);
+
+  // A quiet night updates the status and adds no day.
+  write(join(artifact, "diff.json"), JSON.stringify({ changes: [] }));
+  run("2026-10-13");
+  assert.ok(!existsSync(join(data, "history", "2026-10-13.json")));
+  assert.match(readFile(join(data, "README.md"), "utf8"), /Last checked: \*\*2026-10-13\*\*, 1 server\./);
+});
