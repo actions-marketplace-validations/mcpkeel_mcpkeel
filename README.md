@@ -344,6 +344,18 @@ The plugin runs the mcpkeel version it pins in its own lockfile, which Claude Co
 | Lowest severity that counts | `critical`, `high`, `medium`, `low` | `low` |
 | Per-server timeout | seconds | `20` |
 
+## In Codex
+
+The same plugin runs in Codex, from this repository's Codex marketplace:
+
+```sh
+codex plugin marketplace add mcpkeel/mcpkeel
+```
+
+Then install mcpkeel from `/plugins`, and review its hooks with `/hooks` when Codex asks. It checks the project when a session starts and blocks calls to the tools of a server that changed. Codex cannot ask before a tool call, so where Claude Code would ask, Codex blocks. Set `MCPKEEL_ON_DRIFT=warn` to only be told at session start, and `MCPKEEL_ON_UNVERIFIED` and `MCPKEEL_TIMEOUT` like the Claude Code settings above.
+
+The Codex hooks are tested with the input Codex documents, not yet in a live Codex session.
+
 ## In CI
 
 ### GitHub Action

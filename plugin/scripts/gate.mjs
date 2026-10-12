@@ -9,6 +9,20 @@ const server = input.mcp_server?.name ?? /^mcp__(.+?)__/.exec(input.tool_name ??
 if (!server) process.exit(0);
 
 const state = readState(projectDir(input));
+if (state?.untrusted) {
+  // A record this user cannot vouch for may have been planted to clear a
+  // server, so no MCP call goes through on its word.
+  process.stdout.write(
+    JSON.stringify({
+      hookSpecificOutput: {
+        hookEventName: "PreToolUse",
+        permissionDecision: "deny",
+        permissionDecisionReason: `Blocked by mcpkeel: its record of this project's MCP servers is not private to this user (${state.path}). Tell the user; deleting that file and starting a new session lets mcpkeel check again.`,
+      },
+    }),
+  );
+  process.exit(0);
+}
 // No lockfile, or a server the lockfile does not cover, such as one from the
 // user's own config: not mcpkeel's to decide.
 const entry = state?.servers?.[server];

@@ -1,0 +1,25 @@
+{
+  "name": "mcpkeel",
+  "version": "0.1.0",
+  "description": "Checks this project's MCP servers against mcp.lock when a session starts, and blocks calls to a server that changed.",
+  "author": { "name": "Gabriel", "url": "https://mcpkeel.app" },
+  "homepage": "https://mcpkeel.app",
+  "repository": "https://github.com/mcpkeel/mcpkeel",
+  "license": "MIT",
+  "keywords": ["mcp", "security", "lockfile", "supply-chain", "tool-poisoning"],
+  "skills": "./codex-skills/",
+  "hooks": "./hooks/codex-hooks.json",
+  "interface": {
+    "displayName": "mcpkeel",
+    "shortDescription": "The lockfile for MCP: block servers that changed",
+    "longDescription": "When a session starts, mcpkeel checks the project's MCP servers against the mcp.lock committed in the repository. A server whose tool descriptions, schemas or package release changed since it was reviewed is reported, and calls to its tools are blocked until the change is reviewed and accepted.",
+    "developerName": "Gabriel",
+    "websiteURL": "https://mcpkeel.app",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "defaultPrompt": [
+      "Check whether this project's MCP servers still match mcp.lock.",
+      "Show what changed in the MCP servers since mcp.lock."
+    ]
+  }
+}

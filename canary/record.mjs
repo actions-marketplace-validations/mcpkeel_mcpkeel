@@ -33,9 +33,14 @@ if (changes.length) {
   writeFileSync(join(data, "history", `${date}.json`), `${JSON.stringify(dayRecord(date, changes), null, 2)}\n`);
 }
 
+// The first night has no comparison, only a baseline: its servers come from the lockfile.
+const baseline = read(join(artifact, "mcp.lock"));
+const checked = Array.isArray(verify?.servers)
+  ? verify.servers
+  : Object.entries(baseline?.servers ?? {}).map(([name, entry]) => ({ name, status: "pinned", serverInfo: entry?.serverInfo }));
 const status = {
   lastChecked: date,
-  servers: (Array.isArray(verify?.servers) ? verify.servers : []).map((server) => ({
+  servers: checked.map((server) => ({
     name: plain(server.name),
     status: plain(server.status),
     version: server.serverInfo?.version ? plain(server.serverInfo.version) : null,

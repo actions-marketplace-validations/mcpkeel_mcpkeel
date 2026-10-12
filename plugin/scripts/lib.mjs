@@ -1,9 +1,9 @@
 // Shared by the plugin's hooks and skills: where mcpkeel is, where the plugin
 // keeps its state, and what the user configured.
 import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { createHash, randomBytes } from "node:crypto";
+import { closeSync, existsSync, lstatSync, mkdirSync, openSync, readFileSync, renameSync, writeSync } from "node:fs";
+import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -44,43 +44,95 @@ export function runMcpkeel(projectDir, args, timeoutMs) {
 /** The user's choices from the plugin's userConfig, with the defaults the manifest declares. */
 export function options() {
   const pick = (key, allowed, fallback) => {
-    const value = process.env[`CLAUDE_PLUGIN_OPTION_${key}`];
+    // Claude Code passes the plugin's settings this way; in Codex, which has no
+    // plugin settings, the same choice is an MCPKEEL_ variable.
+    const value = process.env[`CLAUDE_PLUGIN_OPTION_${key}`] ?? process.env[`MCPKEEL_${key}`];
     return allowed.includes(value) ? value : fallback;
   };
-  const seconds = Number(process.env.CLAUDE_PLUGIN_OPTION_TIMEOUT);
+  const seconds = Number(process.env.CLAUDE_PLUGIN_OPTION_TIMEOUT ?? process.env.MCPKEEL_TIMEOUT);
+  // Codex parses "ask" but does not support it: it lets the call through. A
+  // gate that cannot ask there must refuse instead.
+  const ask = (value) => (value === "ask" && host() === "codex" ? "deny" : value);
   return {
-    onDrift: pick("ON_DRIFT", ["ask", "deny", "warn"], "ask"),
-    onUnverified: pick("ON_UNVERIFIED", ["allow", "ask", "deny"], "allow"),
+    onDrift: ask(pick("ON_DRIFT", ["ask", "deny", "warn"], "ask")),
+    onUnverified: ask(pick("ON_UNVERIFIED", ["allow", "ask", "deny"], "allow")),
     failOn: pick("FAIL_ON", ["critical", "high", "medium", "low"], "low"),
     timeoutSeconds: Number.isFinite(seconds) && seconds > 0 ? seconds : 20,
   };
 }
 
+/**
+ * The project root. Claude Code names it; Codex passes only the session's
+ * working directory, so the nearest directory above it with an mcp.lock, or
+ * else a .git, is taken as the root.
+ */
 export function projectDir(input) {
-  return process.env.CLAUDE_PROJECT_DIR || input?.cwd || process.cwd();
+  if (process.env.CLAUDE_PROJECT_DIR) return process.env.CLAUDE_PROJECT_DIR;
+  const start = resolve(input?.cwd || process.cwd());
+  for (let dir = start; ; dir = dirname(dir)) {
+    if (existsSync(join(dir, "mcp.lock")) || existsSync(join(dir, ".git"))) return dir;
+    if (dirname(dir) === dir) return start;
+  }
 }
 
-/** One state file per project, so two projects open at once do not overwrite each other. */
+/** Codex sets PLUGIN_ROOT for plugin hooks; Claude Code does not. */
+export function host() {
+  return process.env.PLUGIN_ROOT ? "codex" : "claude-code";
+}
+
+/**
+ * One state file per project, so two projects open at once do not overwrite
+ * each other. It lives in the data directory the host gives the plugin, or
+ * else under the user's home: never in a shared directory, where another
+ * account could plant a record that clears a server.
+ */
 export function statePath(project) {
-  const base = process.env.CLAUDE_PLUGIN_DATA || join(tmpdir(), "mcpkeel-plugin");
+  const base = process.env.CLAUDE_PLUGIN_DATA || process.env.PLUGIN_DATA || join(homedir(), ".cache", "mcpkeel-plugin");
   const key = createHash("sha256").update(resolve(project)).digest("hex").slice(0, 32);
   return join(base, "state", `${key}.json`);
 }
 
+/**
+ * Whether a path is a plain file or directory owned by this user and writable
+ * by no one else. The gate's decisions rest on the state file, so a file
+ * someone else could have written is not trusted. Platforms without file
+ * owners, such as Windows, are not checked.
+ */
+function ownedByMe(path) {
+  if (typeof process.getuid !== "function") return true;
+  const info = lstatSync(path);
+  return !info.isSymbolicLink() && info.uid === process.getuid() && (info.mode & 0o022) === 0;
+}
+
+/**
+ * The recorded state, `undefined` when there is none, or `{ untrusted: true }`
+ * when a file is there but this user cannot vouch for it.
+ */
 export function readState(project) {
+  const path = statePath(project);
+  if (!existsSync(path)) return undefined;
   try {
-    return JSON.parse(readFileSync(statePath(project), "utf8"));
+    if (!ownedByMe(path) || !ownedByMe(dirname(path))) return { untrusted: true, path };
+    return JSON.parse(readFileSync(path, "utf8"));
   } catch {
-    return undefined;
+    return { untrusted: true, path };
   }
 }
 
 export function writeState(project, state) {
   const path = statePath(project);
-  mkdirSync(dirname(path), { recursive: true });
-  // Written whole, then renamed into place, so a tool call never reads half a file.
-  const temporary = `${path}.${process.pid}.tmp`;
-  writeFileSync(temporary, JSON.stringify(state, null, 2));
+  mkdirSync(dirname(path), { recursive: true, mode: 0o700 });
+  if (!ownedByMe(dirname(path))) throw new Error(`refusing to write mcpkeel state: ${dirname(path)} is not private to this user`);
+  // Written whole under a fresh random name that must not exist yet, then
+  // renamed into place, so a tool call never reads half a file and nothing
+  // planted at the temporary name is followed or overwritten.
+  const temporary = `${path}.${randomBytes(8).toString("hex")}.tmp`;
+  const fd = openSync(temporary, "wx", 0o600);
+  try {
+    writeSync(fd, JSON.stringify(state, null, 2));
+  } finally {
+    closeSync(fd);
+  }
   renameSync(temporary, path);
 }
 
