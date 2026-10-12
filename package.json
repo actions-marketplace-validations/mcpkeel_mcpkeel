@@ -1,6 +1,6 @@
 {
   "name": "mcpkeel",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The lockfile for MCP. Pin your MCP servers' tool definitions in mcp.lock and catch silent drift in CI.",
   "keywords": [
     "mcp",
