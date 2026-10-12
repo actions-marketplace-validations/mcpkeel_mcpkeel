@@ -385,6 +385,13 @@ test("the canary records a day's changes, keeps the baseline, and builds the fee
   const readme = readFile(join(data, "README.md"), "utf8");
   assert.match(readme, /\| \[2026-10-12\]\(history\/2026-10-12\.md\) \| 2 \(1 high, 1 low\) \| `mem__http_\/\/x_`, `memory` \|/);
 
+  // The first night, with no comparison yet, counts the servers in the baseline.
+  const first = mkdtempSync(join(tmpdir(), "canary-first-"));
+  const firstData = mkdtempSync(join(tmpdir(), "canary-data-"));
+  write(join(first, "mcp.lock"), JSON.stringify({ lockfileVersion: 1, servers: { a: { tools: {} }, b: { tools: {} } } }));
+  execFileSync(process.execPath, [join(root, "canary", "record.mjs"), first, firstData, "2026-10-11"]);
+  assert.match(readFile(join(firstData, "README.md"), "utf8"), /Last checked: \*\*2026-10-11\*\*, 2 servers\./);
+
   // A quiet night updates the status and adds no day.
   write(join(artifact, "diff.json"), JSON.stringify({ changes: [] }));
   run("2026-10-13");
