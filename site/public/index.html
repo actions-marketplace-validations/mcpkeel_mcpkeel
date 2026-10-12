@@ -69,11 +69,6 @@
           <div class="install"><code>npx mcpkeel init</code><button type="button" class="copy" data-copy="npx mcpkeel init">Copy</button></div>
           <span class="path-note">Pins every server in your MCP config into <code>mcp.lock</code>.</span>
         </li>
-        <li>
-          <span class="path-label">In CI, pinned</span>
-          <div class="install"><code>npm i -D mcpkeel@0.3.0</code><button type="button" class="copy" data-copy="npm i -D mcpkeel@0.3.0">Copy</button></div>
-          <span class="path-note">The tool that pins your servers, pinned itself. Then <code>npx mcpkeel verify</code>.</span>
-        </li>
       </ul>
       <p class="fine">MIT licensed, no account, no telemetry. Releases are signed with npm provenance. Needs Node 22 or later.</p>
     </div>
@@ -147,17 +142,6 @@
     </div>
   </div>
 
-  <div class="proof">
-    <dl class="numbers">
-      <div><dt>485<span>/485</span></dt><dd>poisoned tools from the MCPTox benchmark reported as drift</dd></div>
-      <div><dt>0<span>/362</span></dt><dd>real tools of the same 45 servers flagged by mistake</dd></div>
-    </dl>
-    <div class="case">
-      <p class="case-date">2026-10-11</p>
-      <p><code>@modelcontextprotocol/server-memory</code> published 1.0.0. A project that starts it with <code>npx -y</code> ran new code that morning with its config unchanged. <code>mcpkeel verify</code> reported the new release, a rewritten tool description, a tightened parameter and a new output schema, and exited 1.</p>
-    </div>
-  </div>
-  <p class="caption">Measured with <code>eval/mcptox.mjs</code>, which CI runs on every change. Every number on this page comes from a run recorded in <a href="https://github.com/mcpkeel/mcpkeel/blob/main/docs/EVIDENCE.md">docs/EVIDENCE.md</a>.</p>
 </section>
 
 <section class="how wrap" id="how" aria-labelledby="how-title">
@@ -325,15 +309,13 @@ jobs:
   </div>
 </section>
 
-<section class="limits wrap" aria-labelledby="limits-title">
-  <h2 id="limits-title">What it does not do</h2>
-  <dl class="limit-list">
-    <div><dt>It trusts what you pin.</dt><dd><code>init</code> records whatever the server sends that day, and points out anything that trips a check. Read the lockfile before you commit it.</dd></div>
-    <div><dt>It checks definitions, not behavior.</dt><dd>It pins the release that runs, so new code fails <code>verify</code>, but it does not read that code. Reviewing a release before you accept it is still yours to do.</dd></div>
-    <div><dt>It checks when you run it.</dt><dd>It is not a proxy between your agent and the server. <code>--probe</code> narrows the gap without closing it.</dd></div>
-    <div><dt>It does not read tool results.</dt><dd>Instructions can also arrive in what a tool returns. That needs a runtime guard.</dd></div>
-    <div><dt>No browser sign-in yet.</dt><dd>Remote servers that take a token in a header work. Servers that need OAuth do not.</dd></div>
-    <div><dt>The built-in checks are pattern matches.</dt><dd>On their own they flag 50 of MCPTox's 485 poisoned tools. The lockfile catches every one as a change; the checks only decide how loud it is, and the model review reads the wording.</dd></div>
+<section class="fit wrap" aria-labelledby="fit-title">
+  <h2 id="fit-title">Where it fits</h2>
+  <dl class="fit-list">
+    <div><dt>At build time, in your repository.</dt><dd>mcpkeel is the gate between a server's next release and your agent. It runs in CI, on every pull request and on a schedule, and turns a change to a server into a diff someone reviews.</dd></div>
+    <div><dt>Next to code review.</dt><dd>It names the release that changed and every line of text that changed with it, so reviewing a new server release starts from a diff instead of a hunt.</dd></div>
+    <div><dt>Next to a runtime guard.</dt><dd>It checks what a server declares before your agent connects. What a tool returns while it runs is a runtime guard's job. Together they cover both ends.</dd></div>
+    <div><dt>With the clients and models you already use.</dt><dd>Claude Code, Cursor, VS Code, opencode, Codex and Gemini CLI configs, local and remote servers, and the review model of your choice, including one on your own machine.</dd></div>
   </dl>
 </section>
 
