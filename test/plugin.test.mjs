@@ -3,7 +3,7 @@
 // environment, and mcpkeel itself from this repository's build.
 import assert from "node:assert/strict";
 import { execFile, execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
@@ -180,4 +180,24 @@ test("plugin in Codex: the hooks, skills and marketplace point at files that exi
   const marketplace = JSON.parse(readFileSync(join(root, ".agents", "plugins", "marketplace.json"), "utf8"));
   assert.ok(existsSync(join(root, marketplace.plugins[0].source.path, ".codex-plugin", "plugin.json")));
   assert.equal(marketplace.plugins[0].name, manifest.name);
+});
+
+test("plugin: a state record someone else could have written is not trusted, and the gate fails closed", { skip: typeof process.getuid !== "function" }, async () => {
+  const { chmodSync } = await import("node:fs");
+  const p = project();
+  await sessionStart(p);
+  assert.equal((await callTool(p)).stdout, "");
+  // Make the record writable by others, as a planted or tampered file would be.
+  const { readdirSync } = await import("node:fs");
+  const dir = join(p.data, "state");
+  const file = join(dir, readdirSync(dir).find((name) => name.endsWith(".json")));
+  chmodSync(file, 0o666);
+  const gate = (await callTool(p)).json.hookSpecificOutput;
+  assert.equal(gate.permissionDecision, "deny");
+  assert.match(gate.permissionDecisionReason, /is not private to this user/);
+  // A fresh check replaces it with a private record, and calls go through again.
+  chmodSync(file, 0o600);
+  await sessionStart(p);
+  assert.equal((await callTool(p)).stdout, "");
+  assert.equal(statSync(file).mode & 0o077, 0);
 });
