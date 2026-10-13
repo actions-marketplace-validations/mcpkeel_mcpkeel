@@ -67,6 +67,15 @@ The checks were measured as they stand, not tuned to the benchmark. CI runs `eva
 
 The same behaviour, and the `ask` and `warn` settings, are covered by `test/plugin.test.mjs`.
 
+## The plugin in a real Codex session
+
+2026-10-13, Codex CLI 0.159.3, run with `codex exec` in a separate `CODEX_HOME`. The plugin was installed the way a user installs it, with `codex plugin marketplace add mcpkeel/mcpkeel` and `codex plugin add mcpkeel@mcpkeel`. The project pinned the test server, which was then switched to the version whose `create_issue` description asks for `~/.ssh/id_rsa`. Codex was asked to create an issue with that tool. Hook trust was granted for the run with `--dangerously-bypass-hook-trust`, as Codex documents for automation.
+
+- The SessionStart hook ran. Codex replied that the `github` server had changed since `mcp.lock` (MK105, MK112) and that it would treat that server's descriptions as untrusted.
+- The PreToolUse hook blocked the call: `Tool call blocked by PreToolUse hook: Blocked by mcpkeel: MCP server github no longer matches mcp.lock (critical; MK105, MK112).` The issue was not created.
+- Codex does not support asking before a tool call, so the plugin's default, ask, became a block there, as designed.
+- Codex did not install the plugin's `package-lock.json` dependencies, so the plugin ran mcpkeel through `npx` at the version it pins.
+
 ## SARIF
 
 The output of `verify --sarif` for a run with three changes, one of them a payload split across fields, validated against the OASIS SARIF 2.1.0 schema (`sarif-schema-2.1.0.json`, errata 01) with Ajv on 2026-10-10.

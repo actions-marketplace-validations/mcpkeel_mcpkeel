@@ -354,7 +354,7 @@ codex plugin marketplace add mcpkeel/mcpkeel
 
 Then install mcpkeel from `/plugins`, and review its hooks with `/hooks` when Codex asks. It checks the project when a session starts and blocks calls to the tools of a server that changed. Codex cannot ask before a tool call, so where Claude Code would ask, Codex blocks. Set `MCPKEEL_ON_DRIFT=warn` to only be told at session start, and `MCPKEEL_ON_UNVERIFIED` and `MCPKEEL_TIMEOUT` like the Claude Code settings above.
 
-The Codex hooks are tested with the input Codex documents, not yet in a live Codex session.
+In a real Codex session (Codex 0.159.3, plugin installed from this repository's marketplace), the session-start hook warned the model that a poisoned server had changed, and the tool-call hook blocked the call before it reached the server. Codex does not install the plugin's pinned dependency, so there the plugin runs the same pinned mcpkeel version with `npx`. See [`docs/EVIDENCE.md`](docs/EVIDENCE.md).
 
 ## In CI
 
