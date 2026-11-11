@@ -95,6 +95,26 @@ function action(ws, env) {
 
 const read = (path) => (existsSync(path) ? readFileSync(path, "utf8") : "");
 
+// action.yml hands every input to the script as an environment variable, and
+// an input left unset arrives as an empty string, not as a missing variable.
+const UNSET_INPUTS = {
+  MCPKEEL_CONFIG: "",
+  MCPKEEL_ANTHROPIC_API_KEY: "",
+  MCPKEEL_REVIEW_MODEL: "",
+  MCPKEEL_PROVIDER: "",
+  MCPKEEL_REVIEW_URL: "",
+  MCPKEEL_REVIEW_KEY: "",
+  MCPKEEL_SARIF: "",
+  MCPKEEL_BASE: "",
+};
+
+test("inputs left unset, as GitHub passes them, are treated as unset", { skip }, async () => {
+  const ws = workspace();
+  const clean = await action(ws, { ...UNSET_INPUTS, MCPKEEL_MODE: "verify", MCPKEEL_EXPLAIN: "false", MCPKEEL_PROBE: "false" });
+  assert.equal(clean.code, 0, clean.stderr);
+  assert.match(read(ws.output), /drift=false/);
+});
+
 test("verify mode passes the exit code through and writes the job summary", { skip }, async () => {
   const ws = workspace();
   const clean = await action(ws, { MCPKEEL_MODE: "verify" });

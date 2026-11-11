@@ -106,6 +106,16 @@ interface Options {
   p: Palette;
 }
 
+/**
+ * An environment variable, or undefined when it is unset or empty. The GitHub
+ * Action passes every input it has as a variable, and an input left unset
+ * arrives as an empty string, which must not count as a value.
+ */
+function env(name: string): string | undefined {
+  const value = process.env[name];
+  return value === undefined || value === "" ? undefined : value;
+}
+
 async function main(argv: string[]): Promise<number> {
   let parsed;
   try {
@@ -147,7 +157,7 @@ async function main(argv: string[]): Promise<number> {
   const timeoutSecs = Number(values.timeout ?? "30");
   if (!Number.isFinite(timeoutSecs) || timeoutSecs <= 0) throw new UserError("--timeout must be a positive number of seconds.");
 
-  const provider = (values.provider ?? process.env.MCPKEEL_PROVIDER ?? "anthropic").toLowerCase();
+  const provider = (values.provider ?? env("MCPKEEL_PROVIDER") ?? "anthropic").toLowerCase();
   if (provider !== "anthropic" && provider !== "openai") throw new UserError("--provider must be anthropic or openai.");
 
   const cwd = process.cwd();
@@ -159,8 +169,8 @@ async function main(argv: string[]): Promise<number> {
     explain: Boolean(values.explain),
     provider,
     // Claude has a default model. An OpenAI-compatible endpoint can serve anything, so the model is named.
-    model: values.model ?? process.env.MCPKEEL_MODEL ?? (provider === "anthropic" ? DEFAULT_MODEL : undefined),
-    reviewUrl: values["review-url"] ?? process.env.MCPKEEL_REVIEW_URL,
+    model: values.model ?? env("MCPKEEL_MODEL") ?? (provider === "anthropic" ? DEFAULT_MODEL : undefined),
+    reviewUrl: values["review-url"] ?? env("MCPKEEL_REVIEW_URL"),
     report: values.report ? resolve(cwd, values.report) : undefined,
     sarif: values.sarif ? resolve(cwd, values.sarif) : undefined,
     policy: values.policy ? resolve(cwd, values.policy) : undefined,
@@ -494,7 +504,7 @@ async function snapshot(options: Options): Promise<{ specs: ServerSpec[]; result
     // The reviewer's key is mcpkeel's own, so the servers it starts do not get it.
     hiddenEnv: options.explain && options.provider === "openai" ? ["OPENAI_API_KEY"] : [],
     resolve: options.resolve
-      ? { timeoutMs: options.timeoutMs, npmRegistry: process.env.MCPKEEL_NPM_REGISTRY, pypiUrl: process.env.MCPKEEL_PYPI_URL }
+      ? { timeoutMs: options.timeoutMs, npmRegistry: env("MCPKEEL_NPM_REGISTRY"), pypiUrl: env("MCPKEEL_PYPI_URL") }
       : false,
   });
   return { specs, results, configPath };
@@ -534,12 +544,12 @@ async function review(changes: Change[], options: Options, lenient: boolean): Pr
       ? openaiReviewer({
           apiKey: process.env.MCPKEEL_REVIEW_API_KEY || process.env.OPENAI_API_KEY || undefined,
           model: options.model,
-          baseUrl: options.reviewUrl ?? process.env.OPENAI_BASE_URL,
+          baseUrl: options.reviewUrl ?? env("OPENAI_BASE_URL"),
         })
       : claudeReviewer({
           apiKey: process.env.ANTHROPIC_API_KEY,
           model: options.model ?? DEFAULT_MODEL,
-          baseUrl: options.reviewUrl ?? process.env.ANTHROPIC_BASE_URL,
+          baseUrl: options.reviewUrl ?? env("ANTHROPIC_BASE_URL"),
         });
   if (!options.json && process.stderr.isTTY) {
     process.stderr.write(options.p.dim(`Asking ${reviewer.name === "claude" ? "Claude" : "the reviewer"} (${reviewer.model}) to review ${plural(targets.length, "change")}…\n`));

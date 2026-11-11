@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+### Fixed
+
+- The GitHub Action failed on every run that left `provider` unset, with `--provider must be anthropic or openai.` The action passes each input as an environment variable, and an unset input arrives as an empty string, which the CLI read as a value. Empty `MCPKEEL_PROVIDER`, `MCPKEEL_MODEL`, `MCPKEEL_REVIEW_URL`, `MCPKEEL_NPM_REGISTRY`, `MCPKEEL_PYPI_URL`, `OPENAI_BASE_URL` and `ANTHROPIC_BASE_URL` are now treated as unset. The action's tests now run with its inputs as GitHub passes them. Found by running the action in [mcpkeel-example](https://github.com/mcpkeel/mcpkeel-example).
+
 ## 0.4.0
 
 ### Added
