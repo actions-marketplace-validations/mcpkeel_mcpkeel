@@ -3,14 +3,25 @@
   // Deploy from this folder with: npx wrangler deploy
   "name": "mcpkeel-site",
   "compatibility_date": "2026-10-01",
+  // The Worker answers /drift, from the canary's feed.json, and hands every
+  // other request to the static assets.
+  "main": "src/worker.js",
   "assets": {
     "directory": "./public",
-    "not_found_handling": "404-page"
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    // A browser's page navigation to a path with no asset is answered with
+    // the 404 page before the Worker runs, so /drift goes to the Worker first.
+    "run_worker_first": ["/drift", "/drift/"]
   },
   // The zone mcpkeel.app is on this Cloudflare account, so deploying creates
   // the DNS records and certificates for both hostnames.
   "routes": [
     { "pattern": "mcpkeel.app", "custom_domain": true },
     { "pattern": "www.mcpkeel.app", "custom_domain": true }
-  ]
+  ],
+  // Workers Builds runs `npx wrangler preview` for every non-production
+  // branch, and that command refuses to run without this block. Empty is
+  // enough: assets and compatibility settings stay at the top level.
+  "previews": {}
 }

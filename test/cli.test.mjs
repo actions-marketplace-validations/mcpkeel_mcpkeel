@@ -275,7 +275,7 @@ async function mockClaude(t, decide, status = 200) {
     const items = JSON.parse(unwrap(body.system, body.messages[0].content));
     const verdicts = items.map((item) => ({ index: item.index, ...decide(item) }));
     res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify({ content: [{ type: "text", text: `Here you go:\n${JSON.stringify(verdicts)}` }] }));
+    res.end(JSON.stringify({ content: [{ type: "text", text: `Here you go:\n${JSON.stringify(verdicts)}` }], usage: { input_tokens: 120, output_tokens: 30 } }));
   });
   await new Promise((resolve) => api.listen(0, "127.0.0.1", resolve));
   t.after(() => api.close());
@@ -289,6 +289,8 @@ test("--explain sends only the changed definitions to the Claude API and prints 
   const result = await run(dir, ["diff", "--explain"], { FIXTURE_VARIANT: "rugpull", ...claude.env });
   assert.equal(result.code, 0, result.stderr);
   assert.match(result.stdout, /Claude: adversarial\. Tells the agent to read an SSH private key/);
+  // What the review cost, as the API reported it.
+  assert.match(result.stdout, /Review by claude-sonnet-5-5: 1 request, 120 input and 30 output tokens, \d+\.\d s\./);
 
   const [call] = claude.calls;
   assert.equal(call.url, "/v1/messages");
@@ -998,7 +1000,7 @@ async function mockOpenAI(t, decide) {
     const items = JSON.parse(unwrap(body.messages[0].content, body.messages[1].content));
     const verdicts = items.map((item) => ({ index: item.index, ...decide(item) }));
     res.writeHead(200, { "content-type": "application/json" });
-    res.end(JSON.stringify({ choices: [{ message: { role: "assistant", content: JSON.stringify(verdicts) } }] }));
+    res.end(JSON.stringify({ choices: [{ message: { role: "assistant", content: JSON.stringify(verdicts) } }], usage: { prompt_tokens: 200, completion_tokens: 40 } }));
   });
   await new Promise((resolve) => api.listen(0, "127.0.0.1", resolve));
   t.after(() => api.close());
@@ -1028,6 +1030,11 @@ test("--provider openai reviews through any OpenAI-compatible endpoint, under th
   const change = JSON.parse(result.stdout).changes.find((c) => c.kind === "tool.description.changed");
   assert.equal(change.severity, "critical");
   assert.deepEqual(change.review, { by: "openai", model: "local-model", verdict: "cosmetic", reason: "Harmless.", effect: "kept" });
+  const { review } = JSON.parse(result.stdout);
+  assert.equal(review.model, "local-model");
+  assert.equal(review.requests, 1);
+  assert.equal(review.inputTokens, 200);
+  assert.equal(review.outputTokens, 40);
   // The reviewer's key is not handed to the server being checked.
   assert.ok(!JSON.parse(readFileSync(dump, "utf8")).includes("OPENAI_API_KEY"));
 

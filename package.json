@@ -1,6 +1,6 @@
 {
   "name": "mcpkeel",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "The lockfile for MCP. Pin your MCP servers' tool definitions in mcp.lock and catch silent drift in CI.",
   "keywords": [
     "mcp",
@@ -43,7 +43,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
-    "smol-toml": "1.9.0"
+    "smol-toml": "1.9.1"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

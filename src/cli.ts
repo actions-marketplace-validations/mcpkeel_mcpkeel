@@ -13,6 +13,7 @@ import { POLICY_NAME, applyPolicy, readPolicy, unknownServers, type Policy } fro
 import { packageRef } from "./resolve.js";
 import { palette, plural, renderChange, renderMarkdown, summarize, summaryLine, type Palette } from "./report.js";
 import { DEFAULT_MODEL, applyReviews, claudeReviewer, openaiReviewer, reviewable } from "./review.js";
+import type { ReviewUsage } from "./review.js";
 import { visible } from "./scan.js";
 import { snapshotAll, type SnapshotResult } from "./snapshot.js";
 import { SEVERITIES, type Change, type Lockfile, type ServerEntry, type ServerSpec, type Severity } from "./types.js";
@@ -106,6 +107,16 @@ interface Options {
   p: Palette;
 }
 
+/**
+ * An environment variable, or undefined when it is unset or empty. The GitHub
+ * Action passes every input it has as a variable, and an input left unset
+ * arrives as an empty string, which must not count as a value.
+ */
+function env(name: string): string | undefined {
+  const value = process.env[name];
+  return value === undefined || value === "" ? undefined : value;
+}
+
 async function main(argv: string[]): Promise<number> {
   let parsed;
   try {
@@ -147,7 +158,7 @@ async function main(argv: string[]): Promise<number> {
   const timeoutSecs = Number(values.timeout ?? "30");
   if (!Number.isFinite(timeoutSecs) || timeoutSecs <= 0) throw new UserError("--timeout must be a positive number of seconds.");
 
-  const provider = (values.provider ?? process.env.MCPKEEL_PROVIDER ?? "anthropic").toLowerCase();
+  const provider = (values.provider ?? env("MCPKEEL_PROVIDER") ?? "anthropic").toLowerCase();
   if (provider !== "anthropic" && provider !== "openai") throw new UserError("--provider must be anthropic or openai.");
 
   const cwd = process.cwd();
@@ -159,8 +170,8 @@ async function main(argv: string[]): Promise<number> {
     explain: Boolean(values.explain),
     provider,
     // Claude has a default model. An OpenAI-compatible endpoint can serve anything, so the model is named.
-    model: values.model ?? process.env.MCPKEEL_MODEL ?? (provider === "anthropic" ? DEFAULT_MODEL : undefined),
-    reviewUrl: values["review-url"] ?? process.env.MCPKEEL_REVIEW_URL,
+    model: values.model ?? env("MCPKEEL_MODEL") ?? (provider === "anthropic" ? DEFAULT_MODEL : undefined),
+    reviewUrl: values["review-url"] ?? env("MCPKEEL_REVIEW_URL"),
     report: values.report ? resolve(cwd, values.report) : undefined,
     sarif: values.sarif ? resolve(cwd, values.sarif) : undefined,
     policy: values.policy ? resolve(cwd, values.policy) : undefined,
@@ -313,7 +324,8 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
   sortChanges(changes);
   // In verify, a review that cannot run leaves the stricter rule-based severities
   // in place, so a missing key (a pull request from a fork, say) never loosens the gate.
-  const reviewError = options.explain ? await review(changes, options, mode === "verify") : undefined;
+  const reviewed = options.explain ? await review(changes, options, mode === "verify") : undefined;
+  const reviewError = reviewed?.error;
 
   const failing = changes.filter((change) => atLeast(change.severity, options.failOn));
   const incomplete = incompleteSteps(results, reviewError);
@@ -337,7 +349,7 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
     changes,
     errors: errorList(results),
     incomplete: incomplete.filter((step) => step.step !== "connect"),
-    footer: reviewError ? "Review unavailable, so severities are rule-based only." : undefined,
+    footer: reviewError ? "Review unavailable, so severities are rule-based only." : usageLine(reviewed?.usage),
   });
   writeSarif(options, changes, options.lockfile);
 
@@ -356,7 +368,7 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
           complete: incomplete.length === 0,
           incomplete,
           ...(policy ? { policy: { path: policy.path, entries: policy.accept.length, unknownServers: strays.map((entry) => entry.server) } } : {}),
-          ...(options.explain ? { review: { available: reviewError === undefined, error: reviewError } } : {}),
+          ...(options.explain ? { review: { available: reviewError === undefined, error: reviewError, ...reviewed?.usage } } : {}),
         },
         null,
         2,
@@ -370,6 +382,7 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
   out.push(...renderGroups(results, changes, p));
   out.push("", ...footer(changes, failed.length, mode, options, failing.length, incomplete));
   if (reviewError) out.push(p.yellow(`Review unavailable, so severities are rule-based only: ${reviewError}`));
+  else if (reviewed?.usage) out.push(p.dim(usageLine(reviewed.usage)!));
   for (const result of results) {
     if (result.ok && result.probeNote) out.push(p.yellow(`Probe incomplete: ${visible(result.name)} ${visible(result.probeNote)}`));
     if (result.ok && result.packageNote) out.push(p.yellow(`${visible(result.name)}: ${visible(result.packageNote)}`));
@@ -389,16 +402,19 @@ async function diffFiles(options: Options, oldPath: string, newPath: string): Pr
   const after = readLockfile(resolve(options.cwd, newPath));
   const policy = loadPolicy(options);
   const changes = policy ? applyPolicy(diffLockfiles(before, after), policy) : diffLockfiles(before, after);
-  if (options.explain) await review(changes, options, false);
+  const reviewed = options.explain ? await review(changes, options, false) : undefined;
   writeSarif(options, changes, resolve(options.cwd, newPath));
 
   writeReport(options, {
     heading: changes.length ? `mcpkeel: ${plural(changes.length, "change")} (${summaryLine(changes)})` : "mcpkeel: no changes",
     changes,
+    footer: usageLine(reviewed?.usage),
   });
 
   if (options.json) {
-    return print(JSON.stringify({ drift: changes.length > 0, summary: summarize(changes), changes: changes.map(withCodes) }, null, 2));
+    return print(
+      JSON.stringify({ drift: changes.length > 0, summary: summarize(changes), changes: changes.map(withCodes), ...(reviewed?.usage ? { review: reviewed.usage } : {}) }, null, 2),
+    );
   }
   const { p } = options;
   const out: string[] = [p.dim(`old  ${oldPath}`), p.dim(`new  ${newPath}`), ""];
@@ -407,6 +423,7 @@ async function diffFiles(options: Options, oldPath: string, newPath: string): Pr
     out.push(...renderChangesByServer(changes, p));
     out.push("", `${plural(changes.length, "change")}: ${summaryLine(changes)}.`);
   }
+  if (reviewed?.usage) out.push(p.dim(usageLine(reviewed.usage)!));
   return print(out.join("\n"));
 }
 
@@ -494,7 +511,7 @@ async function snapshot(options: Options): Promise<{ specs: ServerSpec[]; result
     // The reviewer's key is mcpkeel's own, so the servers it starts do not get it.
     hiddenEnv: options.explain && options.provider === "openai" ? ["OPENAI_API_KEY"] : [],
     resolve: options.resolve
-      ? { timeoutMs: options.timeoutMs, npmRegistry: process.env.MCPKEEL_NPM_REGISTRY, pypiUrl: process.env.MCPKEEL_PYPI_URL }
+      ? { timeoutMs: options.timeoutMs, npmRegistry: env("MCPKEEL_NPM_REGISTRY"), pypiUrl: env("MCPKEEL_PYPI_URL") }
       : false,
   });
   return { specs, results, configPath };
@@ -526,20 +543,20 @@ function toLockfile(results: SnapshotResult[]): Lockfile {
  * severity. Returns a message when the review could not run and `lenient` says
  * to carry on without it; otherwise a failure is thrown.
  */
-async function review(changes: Change[], options: Options, lenient: boolean): Promise<string | undefined> {
+async function review(changes: Change[], options: Options, lenient: boolean): Promise<{ error?: string; usage?: ReviewUsage & { model: string } }> {
   const targets = reviewable(changes);
-  if (targets.length === 0) return undefined;
+  if (targets.length === 0) return {};
   const reviewer =
     options.provider === "openai"
       ? openaiReviewer({
           apiKey: process.env.MCPKEEL_REVIEW_API_KEY || process.env.OPENAI_API_KEY || undefined,
           model: options.model,
-          baseUrl: options.reviewUrl ?? process.env.OPENAI_BASE_URL,
+          baseUrl: options.reviewUrl ?? env("OPENAI_BASE_URL"),
         })
       : claudeReviewer({
           apiKey: process.env.ANTHROPIC_API_KEY,
           model: options.model ?? DEFAULT_MODEL,
-          baseUrl: options.reviewUrl ?? process.env.ANTHROPIC_BASE_URL,
+          baseUrl: options.reviewUrl ?? env("ANTHROPIC_BASE_URL"),
         });
   if (!options.json && process.stderr.isTTY) {
     process.stderr.write(options.p.dim(`Asking ${reviewer.name === "claude" ? "Claude" : "the reviewer"} (${reviewer.model}) to review ${plural(targets.length, "change")}…\n`));
@@ -547,11 +564,18 @@ async function review(changes: Change[], options: Options, lenient: boolean): Pr
   try {
     applyReviews(targets, await reviewer.review(targets), reviewer);
   } catch (err) {
-    if (lenient && err instanceof UserError) return err.message;
+    if (lenient && err instanceof UserError) return { error: err.message };
     throw err;
   }
   sortChanges(changes);
-  return undefined;
+  return { usage: { model: reviewer.model, ...reviewer.usage } };
+}
+
+/** One line on what the review cost, in tokens as the endpoint reported them. Prices differ by provider, so no money is shown. */
+function usageLine(usage: (ReviewUsage & { model: string }) | undefined): string | undefined {
+  if (!usage || usage.requests === 0) return undefined;
+  const tokens = usage.inputTokens || usage.outputTokens ? `, ${usage.inputTokens} input and ${usage.outputTokens} output tokens` : ", no token counts reported";
+  return `Review by ${visible(usage.model)}: ${plural(usage.requests, "request")}${tokens}, ${(usage.ms / 1000).toFixed(1)} s.`;
 }
 
 const RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
