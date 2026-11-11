@@ -59,7 +59,11 @@ test("escapeHtml covers every character that can leave text or an attribute", ()
 
 test("the Worker answers /drift with the site's security headers, and hands the rest to the assets", async () => {
   const realFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response(JSON.stringify(FEED), { status: 200 });
+  globalThis.fetch = async (_url, init) => {
+    // Cloudflare Workers reject redirect: "error"; only "follow" and "manual" exist there.
+    assert.equal(init.redirect, "manual");
+    return new Response(JSON.stringify(FEED), { status: 200 });
+  };
   try {
     const assets = { fetch: async () => new Response("asset") };
     const page = await worker.fetch(new Request("https://mcpkeel.app/drift"), { ASSETS: assets });
@@ -72,7 +76,12 @@ test("the Worker answers /drift with the site's security headers, and hands the 
     globalThis.fetch = async () => new Response("{}", { status: 200 });
     const broken = await worker.fetch(new Request("https://mcpkeel.app/drift"), { ASSETS: assets });
     assert.equal(broken.status, 503);
-    assert.equal(broken.headers.get("cache-control"), "no-store");
+
+    // A redirect is refused, not followed.
+    globalThis.fetch = async () => new Response(null, { status: 302, headers: { location: "https://example.com/feed.json" } });
+    const redirected = await worker.fetch(new Request("https://mcpkeel.app/drift"), { ASSETS: assets });
+    assert.equal(redirected.status, 503);
+    assert.equal(redirected.headers.get("cache-control"), "no-store");
   } finally {
     globalThis.fetch = realFetch;
   }

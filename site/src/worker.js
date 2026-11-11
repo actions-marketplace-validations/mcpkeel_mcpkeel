@@ -31,7 +31,9 @@ export default {
 
     let feed;
     try {
-      const response = await fetch(FEED_URL, { cf: { cacheTtl: 900, cacheEverything: true }, redirect: "error" });
+      // Workers support only "follow" and "manual". With "manual" a redirect
+      // comes back as a 3xx, which is not ok, so it is refused below.
+      const response = await fetch(FEED_URL, { cf: { cacheTtl: 900, cacheEverything: true }, redirect: "manual" });
       if (!response.ok) throw new Error(`feed: HTTP ${response.status}`);
       feed = parseFeed(await response.json());
     } catch (error) {
