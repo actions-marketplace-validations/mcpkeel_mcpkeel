@@ -12,5 +12,9 @@
   "routes": [
     { "pattern": "mcpkeel.app", "custom_domain": true },
     { "pattern": "www.mcpkeel.app", "custom_domain": true }
-  ]
+  ],
+  // Workers Builds runs `npx wrangler preview` for every non-production
+  // branch, and that command refuses to run without this block. Empty is
+  // enough: assets and compatibility settings stay at the top level.
+  "previews": {}
 }

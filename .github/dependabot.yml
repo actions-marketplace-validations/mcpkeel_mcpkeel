@@ -1,14 +1,20 @@
 version: 2
 updates:
-  # Actions are pinned by commit; this keeps the pins current.
+  # Actions are pinned by commit; this keeps the pins current. They are
+  # grouped into one weekly pull request, since each is a pin bump.
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
     cooldown:
       default-days: 14
+    groups:
+      actions:
+        patterns: ["*"]
   # Two runtime dependencies, both pinned. New releases wait two weeks, so a
   # compromised one has time to be caught before it is proposed here.
+  # Runtime dependencies keep their own pull requests, so each one is
+  # reviewed on its own; development tooling is grouped.
   - package-ecosystem: npm
     directory: /
     schedule:
@@ -16,3 +22,15 @@ updates:
     cooldown:
       default-days: 14
     open-pull-requests-limit: 5
+    groups:
+      dev-tooling:
+        dependency-type: development
+        update-types: [minor, patch]
+    ignore:
+      # @types/node follows the oldest Node version in `engines` (22), not
+      # the newest release.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+      # TypeScript majors change the compiler; they are upgraded by hand.
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
