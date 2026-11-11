@@ -1,33 +1,5 @@
-@font-face {
-  font-family: "Archivo";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url("/fonts/archivo-latin-wdth-normal.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Archivo";
-  font-style: italic;
-  font-display: swap;
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
-  src: url("/fonts/archivo-latin-wdth-italic.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Commit Mono";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 400;
-  src: url("/fonts/commit-mono-latin-400-normal.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Commit Mono";
-  font-style: normal;
-  font-display: swap;
-  font-weight: 700;
-  src: url("/fonts/commit-mono-latin-700-normal.woff2") format("woff2");
-}
+/* mcpkeel.app. One stylesheet: the design is small enough that tokens and
+   components read best together. Fonts come from next/font (layout.tsx). */
 
 :root {
   --paper: #fbfcfb;
@@ -41,8 +13,9 @@
   --magenta: #b0186f;
   --buff: #f3eacb;
 
-  --sans: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --mono: "Commit Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* The faces are self-hosted by next/font, which sets these two variables. */
+  --sans: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
+  --mono: var(--font-commit-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --gutter: clamp(1.25rem, 4.5vw, 3.5rem);
   --section: clamp(4.5rem, 10vw, 8.5rem);
@@ -778,8 +751,9 @@ footer .fine {
   body {
     font-size: 1rem;
   }
-  .masthead nav a:nth-child(2),
-  .masthead nav a:nth-child(3) {
+  /* On a phone the menu keeps one line: the in-page links go, the feed and
+     the source stay. */
+  .masthead nav .nav-extra {
     display: none;
   }
   .masthead nav {
@@ -837,7 +811,7 @@ footer .fine {
   }
 }
 
-/* The drift feed, /drift, rendered by src/worker.js. */
+/* The drift feed, /drift. */
 .drift {
   max-width: 64rem;
 }
@@ -887,5 +861,81 @@ footer .fine {
   border-bottom: 2px solid var(--ink);
 }
 .drift td:first-child {
+  white-space: nowrap;
+}
+
+/* The proof band under the hero: measured numbers, each with its source. */
+.proof {
+  margin-top: clamp(3rem, 7vw, 5rem);
+}
+.proof ul {
+  border-block: 2px solid var(--ink);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.proof li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.4rem 1.4rem 1.5rem 0;
+}
+.proof li + li {
+  padding-left: 1.4rem;
+  border-left: 1px solid var(--shoal-3);
+}
+.proof .figure {
+  font-size: clamp(2rem, 4.4vw, 3.1rem);
+  font-weight: 800;
+  font-stretch: 66%;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.proof .figure-critical {
+  color: var(--magenta);
+}
+.proof .label {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+.proof .source {
+  margin-top: auto;
+  font-size: 0.82rem;
+}
+@media (max-width: 60rem) {
+  .proof ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .proof li:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .proof li:nth-child(n + 3) {
+    border-top: 1px solid var(--shoal-3);
+  }
+}
+@media (max-width: 40rem) {
+  .proof ul {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .proof li,
+  .proof li + li {
+    padding-left: 0;
+    border-left: 0;
+  }
+  .proof li + li {
+    border-top: 1px solid var(--shoal-3);
+  }
+}
+
+/* The copy button announces its result to screen readers. */
+.copy-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }

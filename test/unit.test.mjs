@@ -236,10 +236,11 @@ test("no source file contains the invisible characters mcpkeel looks for", () =>
   const offenders = [];
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
-      if (["node_modules", "dist", ".git", "fonts"].includes(name)) continue;
+      // Build output is not source: the site's bundles (.next, .open-next) carry React's own.
+      if (["node_modules", "dist", ".git", "fonts", ".next", ".open-next", ".wrangler"].includes(name)) continue;
       const path = join(dir, name);
       if (statSync(path).isDirectory()) walk(path);
-      else if (/\.(ts|mjs|js|json|md|yml|yaml|html|css|sh)$/.test(name)) {
+      else if (/\.(ts|tsx|mjs|js|json|md|yml|yaml|html|css|sh)$/.test(name)) {
         for (const char of readFileSync(path, "utf8")) {
           const cp = char.codePointAt(0);
           if (ranges.some(([low, high]) => cp >= low && cp <= high)) {
