@@ -5,9 +5,9 @@
 ### Added
 
 - `--explain` reports what the review cost: requests, input and output tokens as the endpoint reported them, and time. In the terminal and the Markdown report as one line, and in `--json` under `review`.
-- `eval/explain.mjs` measures `--explain` on the 485 MCPTox poisoned tools, 30 rug pulls written to read like routine releases, and 83 real changes from the drift canary. With Claude Haiku 5.5 as the reviewer, 99.8% of the poisoned tools are graded critical (10.3% with the built-in checks alone), no attack is lowered, and no real change is raised to critical, at $0.08 per 1,000 changes at list price. The README has the table and its limits.
+- `eval/explain.mjs` measures `--explain` on the 485 MCPTox poisoned tools, 30 rug pulls written to read like routine releases, and 83 real changes from the drift canary. With Claude Haiku 5.5 as the reviewer, 99.8% of the poisoned tools are graded critical (10.3% with the built-in checks alone), no attack is lowered, and no real change is raised to critical, at $0.08 per 1,000 changes at list price. The models were reached through a proxy, which reported the token counts; `docs/EVIDENCE.md` says how each run was made. The README has the table and its limits.
 - CI runs the same eval with a judge that is always wrong, and fails if mcpkeel's limits on lowering let more attacks through. 28 of the 30 rug pulls pass every limit, so that judge lowers them: on subtle edits the model is the only defense, and the README says so.
-- The drift feed is published at [mcpkeel.app/drift](https://mcpkeel.app/drift).
+- The drift canary writes `feed.json`, which [mcpkeel.app/drift](https://mcpkeel.app/drift) shows.
 
 ## 0.4.1
 
