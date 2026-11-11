@@ -11,7 +11,6 @@
   --shoal-3: #b3d3e3;
   --contour: #6f9db6;
   --magenta: #b0186f;
-  --buff: #f3eacb;
 
   /* The faces are self-hosted by next/font, which sets these two variables. */
   --sans: var(--font-archivo), "Helvetica Neue", Arial, sans-serif;
@@ -417,7 +416,7 @@ h3 {
   margin-left: -0.45rem;
 }
 .printout .minus {
-  background: var(--buff);
+  background: var(--shoal-1);
 }
 .printout .plus {
   color: var(--magenta);
@@ -648,7 +647,7 @@ h3 {
   font-size: clamp(1.7rem, 3.2vw, 2.4rem);
 }
 .pinned {
-  background: var(--buff);
+  background: var(--shoal-1);
   padding: clamp(1.4rem, 3.4vw, 2.6rem);
 }
 .local {
@@ -674,6 +673,37 @@ footer {
   margin-top: var(--section);
   padding-block: 2.6rem 3.4rem;
   border-top: 3px solid var(--ink);
+}
+/* The footer's map of the site: what the product is, why to trust it, where it lives. */
+.footer-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: 2rem clamp(1.5rem, 4vw, 3.5rem);
+  margin-top: 2.4rem;
+}
+.footer-map h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+.footer-map ul {
+  margin-top: 0.7rem;
+  display: grid;
+  gap: 0.45rem;
+  font-size: 0.98rem;
+}
+.footer-map .footer-intro p {
+  margin-top: 0.7rem;
+  max-width: 24em;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+}
+@media (max-width: 60rem) {
+  .footer-map {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .footer-map .footer-intro {
+    grid-column: 1 / -1;
+  }
 }
 footer .install {
   margin-top: 0;
@@ -946,4 +976,30 @@ footer .fine {
 i,
 em {
   font-family: var(--sans-italic);
+}
+
+/* The release line under the install command. */
+.release-line a {
+  white-space: nowrap;
+}
+
+/* /security. */
+.page pre {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+  background: var(--shoal-1);
+  overflow-x: auto;
+  font-size: 0.92rem;
+}
+
+/* A list read as links or facts, without bullets. */
+.bare {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+/* Flags and short commands in running text stay on one line. */
+.page code {
+  white-space: nowrap;
 }
