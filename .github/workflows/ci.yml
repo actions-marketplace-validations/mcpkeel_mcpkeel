@@ -34,3 +34,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: node eval/mcptox.mjs --check
+      # What mcpkeel's limits on lowering stop when the reviewer model is always
+      # wrong. No model runs here; recorded model runs are in
+      # eval/results/explain.json.
+      - run: node eval/explain.mjs --judge worst --check

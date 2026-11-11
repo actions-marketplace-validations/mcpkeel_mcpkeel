@@ -21,7 +21,26 @@ export interface Review {
 export interface Reviewer {
   readonly name: string;
   readonly model: string;
+  /** What the reviews so far cost: requests, tokens as the endpoint reported them, and time waited. */
+  readonly usage: ReviewUsage;
   review(changes: Change[]): Promise<Review[]>;
+}
+
+export interface ReviewUsage {
+  requests: number;
+  inputTokens: number;
+  outputTokens: number;
+  ms: number;
+}
+
+const newUsage = (): ReviewUsage => ({ requests: 0, inputTokens: 0, outputTokens: 0, ms: 0 });
+
+/** Add one request to the totals. An endpoint that reports no usage adds no tokens, only the request and its time. */
+function count(usage: ReviewUsage, started: number, input: unknown, output: unknown): void {
+  usage.requests++;
+  usage.ms += Date.now() - started;
+  if (Number.isFinite(input)) usage.inputTokens += Number(input);
+  if (Number.isFinite(output)) usage.outputTokens += Number(output);
 }
 
 const SYSTEM_HEAD = `You review changes to Model Context Protocol (MCP) tool definitions for a security tool called mcpkeel.
@@ -102,15 +121,18 @@ export interface ClaudeOptions {
  * config, env values or headers.
  */
 export function claudeReviewer(options: ClaudeOptions): Reviewer {
+  const usage = newUsage();
   return {
     name: "claude",
     model: options.model,
+    usage,
     async review(changes: Change[]): Promise<Review[]> {
       if (!options.apiKey) {
         throw new UserError("--explain needs a Claude API key. Set ANTHROPIC_API_KEY (create one at https://platform.claude.com).");
       }
       const tag = newTag();
       const base = (options.baseUrl ?? "https://api.anthropic.com").replace(/\/+$/, "");
+      const started = Date.now();
       const message = (await postJson(
         "Claude API",
         `${base}/v1/messages`,
@@ -122,7 +144,8 @@ export function claudeReviewer(options: ClaudeOptions): Reviewer {
           messages: [{ role: "user", content: untrustedBlock(reviewPayload(changes), tag) }],
         },
         options.timeoutMs,
-      )) as { content?: { type: string; text?: string }[] };
+      )) as { content?: { type: string; text?: string }[]; usage?: { input_tokens?: number; output_tokens?: number } };
+      count(usage, started, message.usage?.input_tokens, message.usage?.output_tokens);
       const text = (message.content ?? []).filter((block) => block.type === "text").map((block) => block.text ?? "").join("");
       return parseReviews(text, changes.length);
     },
@@ -144,9 +167,11 @@ export interface OpenAIOptions {
  */
 export function openaiReviewer(options: OpenAIOptions): Reviewer {
   const base = (options.baseUrl ?? "https://api.openai.com/v1").replace(/\/+$/, "");
+  const usage = newUsage();
   return {
     name: "openai",
     model: options.model ?? "",
+    usage,
     async review(changes: Change[]): Promise<Review[]> {
       if (!options.model) throw new UserError("--provider openai needs --model, the model to ask.");
       // A local model server usually needs no key; a hosted one does.
@@ -154,6 +179,7 @@ export function openaiReviewer(options: OpenAIOptions): Reviewer {
         throw new UserError("--provider openai needs a key. Set MCPKEEL_REVIEW_API_KEY or OPENAI_API_KEY.");
       }
       const tag = newTag();
+      const started = Date.now();
       const reply = (await postJson(
         "Review endpoint",
         `${base}/chat/completions`,
@@ -167,7 +193,8 @@ export function openaiReviewer(options: OpenAIOptions): Reviewer {
           ],
         },
         options.timeoutMs,
-      )) as { choices?: { message?: { content?: string | null } }[] };
+      )) as { choices?: { message?: { content?: string | null } }[]; usage?: { prompt_tokens?: number; completion_tokens?: number } };
+      count(usage, started, reply.usage?.prompt_tokens, reply.usage?.completion_tokens);
       return parseReviews(reply.choices?.[0]?.message?.content ?? "", changes.length);
     },
   };
