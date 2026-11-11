@@ -7,7 +7,8 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import worker, { escapeHtml, parseFeed, renderDrift, summarize } from "../site/src/worker.js";
+import { escapeHtml, parseFeed, renderDrift, summarize } from "../site/src/feed.js";
+import worker from "../site/src/worker.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -117,4 +118,9 @@ test("the recorder writes feed.json, seeding the nights from the data branch's c
 test("Cloudflare runs the Worker first for /drift, so a browser's navigation does not get the 404 page", () => {
   const config = JSON.parse(readFileSync(join(root, "site", "wrangler.jsonc"), "utf8").replace(/^\s*\/\/.*$/gm, ""));
   assert.deepEqual(config.assets.run_worker_first, ["/drift", "/drift/"]);
+});
+
+test("the Worker module exports only its handler, as the Workers runtime requires", async () => {
+  const mod = await import("../site/src/worker.js");
+  assert.deepEqual(Object.keys(mod), ["default"]);
 });
