@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Records one night of the drift canary in the canary-data branch: the new
-// baseline, the day's report when anything changed, and the feed's index.
+// baseline, the day's report when anything changed, the feed's index, and
+// feed.json, which mcpkeel.app/drift reads.
 //
 //   node canary/record.mjs <artifact-dir> <data-dir> <YYYY-MM-DD>
 //
@@ -9,6 +10,7 @@
 // copied, never executed. The index is built from severities checked against
 // a fixed list and names cut down to plain characters. The day's report is
 // mcpkeel's Markdown, which never emits a server's text as Markdown.
+import { execFileSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -50,6 +52,7 @@ const status = {
 };
 writeFileSync(join(data, "status.json"), `${JSON.stringify(status, null, 2)}\n`);
 writeFileSync(join(data, "README.md"), feed(data, status));
+writeFileSync(join(data, "feed.json"), `${JSON.stringify(feedJson(data, status, date), null, 2)}\n`);
 console.log(`${date}: ${changes.length} change(s) recorded, ${status.servers.length} server(s) checked.`);
 
 /** The counts behind a day, without the changed text, which stays in the day's Markdown report. */
@@ -71,11 +74,47 @@ function dayRecord(day, list) {
   };
 }
 
-function feed(dir, current) {
-  const days = readdirSync(join(dir, "history"))
+function recordedDays(dir) {
+  return readdirSync(join(dir, "history"))
     .filter((name) => name.endsWith(".json"))
     .map((name) => JSON.parse(readFileSync(join(dir, "history", name), "utf8")))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
+}
+
+/**
+ * Every night the canary ran, oldest first. The first night only pins a
+ * baseline; each later night is compared with the one before. Kept in
+ * feed.json, and seeded once from this branch's commits, one per night.
+ */
+function nightsChecked(dir, today) {
+  const previous = read(join(dir, "feed.json"));
+  let nights = Array.isArray(previous?.nights) ? previous.nights.filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d)) : undefined;
+  if (!nights) {
+    let log = "";
+    try {
+      log = execFileSync("git", ["-C", dir, "log", "--format=%s"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+    } catch {
+      // A new branch has no commits yet.
+    }
+    nights = [...log.matchAll(/^Canary (\d{4}-\d{2}-\d{2})$/gm)].map((m) => m[1]);
+  }
+  return [...new Set([...nights, today])].sort();
+}
+
+/** What mcpkeel.app/drift shows: counts and names only, no server text. */
+function feedJson(dir, current, today) {
+  const nights = nightsChecked(dir, today);
+  return {
+    lastChecked: current.lastChecked,
+    nights,
+    servers: current.servers,
+    notChecked: current.notChecked,
+    days: recordedDays(dir).map(({ date: day, changes: count, bySeverity, servers }) => ({ date: day, changes: count, bySeverity, servers })),
+  };
+}
+
+function feed(dir, current) {
+  const days = recordedDays(dir);
   const grade = (counts) =>
     Object.entries(counts)
       .filter(([, n]) => n > 0)

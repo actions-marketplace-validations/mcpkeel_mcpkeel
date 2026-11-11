@@ -836,3 +836,56 @@ footer .fine {
     scroll-behavior: auto;
   }
 }
+
+/* The drift feed, /drift, rendered by src/worker.js. */
+.drift {
+  max-width: 64rem;
+}
+.facts-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 2rem;
+  margin-top: 2rem;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+}
+.facts-inline b {
+  font-size: 1.6rem;
+  margin-right: 0.3em;
+}
+.drift .sev-critical {
+  color: var(--magenta);
+}
+.drift .sev-high {
+  color: var(--ink);
+  font-weight: 700;
+}
+.drift .sev-medium,
+.drift .sev-low,
+.drift .quiet {
+  color: var(--ink-soft);
+}
+.table-scroll {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+.drift table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+.drift th,
+.drift td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5rem 1rem 0.5rem 0;
+  border-bottom: 1px solid var(--shoal-2);
+}
+.drift th {
+  font-weight: 700;
+  border-bottom: 2px solid var(--ink);
+}
+.drift td:first-child {
+  white-space: nowrap;
+}

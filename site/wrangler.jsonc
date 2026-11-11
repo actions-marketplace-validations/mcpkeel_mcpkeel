@@ -3,8 +3,12 @@
   // Deploy from this folder with: npx wrangler deploy
   "name": "mcpkeel-site",
   "compatibility_date": "2026-10-01",
+  // The Worker answers /drift, from the canary's feed.json, and hands every
+  // other request to the static assets.
+  "main": "src/worker.js",
   "assets": {
     "directory": "./public",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
   },
   // The zone mcpkeel.app is on this Cloudflare account, so deploying creates
