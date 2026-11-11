@@ -1,20 +1,36 @@
-# mcpkeel
+<div align="center">
+  <img src="docs/assets/logo.svg" alt="" width="72" height="72" />
+  <h1>mcpkeel</h1>
+  <p><strong>The lockfile for MCP.</strong></p>
+  <p>An MCP server can rewrite the tool descriptions your agent trusts, at any time, and nothing tells you.<br />mcpkeel pins them in a file you commit and fails the build when they change.</p>
+  <p>
+    <a href="https://mcpkeel.app">Website</a> ·
+    <a href="#commands">Commands</a> ·
+    <a href="#in-ci">GitHub Action</a> ·
+    <a href="https://mcpkeel.app/drift">Drift feed</a> ·
+    <a href="#measured">Measured</a> ·
+    <a href="https://mcpkeel.app/security">Security</a>
+  </p>
+  <p>
+    <a href="https://www.npmjs.com/package/mcpkeel"><img src="https://img.shields.io/npm/v/mcpkeel?style=flat-square&amp;labelColor=10202C&amp;color=2D6286&amp;label=npm" alt="npm version" /></a>
+    <a href="https://github.com/mcpkeel/mcpkeel/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mcpkeel/mcpkeel/ci.yml?branch=main&amp;style=flat-square&amp;labelColor=10202C&amp;label=CI" alt="CI status" /></a>
+    <a href="docs/EVIDENCE.md#releases-are-built-and-signed-in-ci"><img src="https://img.shields.io/badge/npm-provenance-2D6286?style=flat-square&amp;labelColor=10202C" alt="Signed with npm provenance" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2D6286?style=flat-square&amp;labelColor=10202C" alt="MIT license" /></a>
+    <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-22%2B-2D6286?style=flat-square&amp;labelColor=10202C" alt="Node 22 or later" /></a>
+  </p>
+</div>
 
-[![npm](https://img.shields.io/npm/v/mcpkeel.svg)](https://www.npmjs.com/package/mcpkeel)
-[![CI](https://github.com/mcpkeel/mcpkeel/actions/workflows/ci.yml/badge.svg)](https://github.com/mcpkeel/mcpkeel/actions/workflows/ci.yml)
-[![provenance](https://img.shields.io/badge/npm-provenance-blue.svg)](docs/EVIDENCE.md#releases-are-built-and-signed-in-ci)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node 22+](https://img.shields.io/badge/node-22%2B-brightgreen.svg)](https://nodejs.org)
-
-**The lockfile for MCP.** An MCP server can rewrite the tool descriptions your agent trusts, at any time, and nothing tells you. mcpkeel pins them in a file you commit and fails the build when they change.
+<p align="center">
+  <img src="docs/assets/demo.png" alt="Output of mcpkeel verify: a tool description changed after it was pinned, graded critical with the checks that fired, and the build fails." width="100%" />
+  <br />
+  <sub>Real output of <code>npx mcpkeel demo</code>, with the quoted excerpts under each check left out.</sub>
+</p>
 
 ```sh
 npx mcpkeel demo      # watch it catch a rug pull, on a local server, in seconds
 npx mcpkeel init      # snapshot every server in your MCP config into mcp.lock
 npx mcpkeel verify    # in CI: exit 1 if anything changed
 ```
-
-Website: [mcpkeel.app](https://mcpkeel.app)
 
 ## TL;DR
 
