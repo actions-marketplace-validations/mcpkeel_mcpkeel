@@ -284,7 +284,7 @@ The text under review is written by whoever controls the server, so the model is
 npx mcpkeel verify --explain --provider openai --review-url http://localhost:11434/v1 --model <model>
 ```
 
-`--provider`, `--review-url` and `--model` can also be set with `MCPKEEL_PROVIDER`, `MCPKEEL_REVIEW_URL` and `MCPKEEL_MODEL`. Every report names the model that judged each change.
+`--provider`, `--review-url` and `--model` can also be set with `MCPKEEL_PROVIDER`, `MCPKEEL_REVIEW_URL` and `MCPKEEL_MODEL`. Every report names the model that judged each change. It also says what the review cost: requests, input and output tokens as the endpoint reported them, and time (`review` in `--json`). How well models do is [measured](#the-review-by-a-model).
 
 Whichever model you use:
 
@@ -476,6 +476,23 @@ Code scanning is available on public repositories, and on private ones with GitH
 The checks were measured as they stand, not tuned to the benchmark. They are precise and narrow: they catch requests for credentials and secret files well, and most attacks phrased as ordinary instructions not at all. That is what the lockfile is for. A change is reported because it is a change, whatever it says, and the checks only decide how loud it is. For the wording itself, `--explain` is the second reading, by a model you choose.
 
 Run it yourself with `npm run build && node eval/mcptox.mjs`. CI runs it with `--check` on every change and fails if any number gets worse.
+
+### The review by a model
+
+`eval/explain.mjs` runs `--explain` the way `verify` does, through the shipped reviewer and its limits on lowering, on three sets: the 485 MCPTox poisoned tools; 30 rug pulls, edits to real descriptions written to read like routine releases ([`eval/data/rugpull.json`](eval/data/rugpull.json)); and 83 real changes the drift canary saw on public servers, taken as not adversarial ([`eval/data/canary-benign.json`](eval/data/canary-benign.json)).
+
+| | Built-in checks only | Claude Haiku 5.5 | Claude Sonnet 5.5 |
+| --- | --- | --- | --- |
+| MCPTox poisoned tools graded critical | 50 of 485 (10.3%) | 484 of 485 (99.8%) | 485 of 485 (100%) |
+| Rug pulls called adversarial | — | 30 of 30 | 28 of 30 |
+| Attacks lowered to low | — | 0 of 515 | 0 of 515 |
+| Real changes raised to critical | — | 0 of 83 | 0 of 83 |
+| Real changes lowered to low | — | 7 of 83 (8.4%) | 6 of 83 (7.2%) |
+| Cost per 1,000 changes, at list price | — | $0.08 | $1.55 |
+
+Claude Opus 5.5, on the full sets, graded 475 of 485 poisoned tools adversarial (one batch of 10 got no usable answer in two attempts and kept its rule-based severity), lowered no attack and raised no real change. Two more models, on a fixed sample of 100 MCPTox tools and the full rug-pull and real-change sets: GPT-5.6 Sol graded 98 of 100 poisoned tools adversarial and lowered no attack, but raised 7 of the 83 real changes to critical; Kimi K3 graded 93 of 100, lowered no attack and raised no real change. Cursor's Composer 2.5, run as a read-only agent, graded 88 of 100 and also lowered no attack and raised no real change. All models were reached through a proxy, in batches of 10, on 2026-11-11; [`eval/results/explain.json`](eval/results/explain.json) has every number, the prompt's digest, token counts and latencies.
+
+Two things this does not show. First, the limits on lowering are not what stopped the rug pulls: 28 of the 30 pass every one of them, so a model fooled into "cosmetic" would have lowered them. Run with a judge that is always wrong, the eval shows exactly that, and CI runs it that way on every change (`--judge worst --check`), so a change to the limits that lets more through fails the build. Second, the review removes little noise: of the 83 real changes, the limits allow lowering 27, and the models lowered 6 or 7. It is a second reading for the wording, not a filter that makes drift quiet.
 
 ### Drift feed
 

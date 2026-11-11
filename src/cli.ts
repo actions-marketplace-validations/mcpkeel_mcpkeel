@@ -13,6 +13,7 @@ import { POLICY_NAME, applyPolicy, readPolicy, unknownServers, type Policy } fro
 import { packageRef } from "./resolve.js";
 import { palette, plural, renderChange, renderMarkdown, summarize, summaryLine, type Palette } from "./report.js";
 import { DEFAULT_MODEL, applyReviews, claudeReviewer, openaiReviewer, reviewable } from "./review.js";
+import type { ReviewUsage } from "./review.js";
 import { visible } from "./scan.js";
 import { snapshotAll, type SnapshotResult } from "./snapshot.js";
 import { SEVERITIES, type Change, type Lockfile, type ServerEntry, type ServerSpec, type Severity } from "./types.js";
@@ -323,7 +324,8 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
   sortChanges(changes);
   // In verify, a review that cannot run leaves the stricter rule-based severities
   // in place, so a missing key (a pull request from a fork, say) never loosens the gate.
-  const reviewError = options.explain ? await review(changes, options, mode === "verify") : undefined;
+  const reviewed = options.explain ? await review(changes, options, mode === "verify") : undefined;
+  const reviewError = reviewed?.error;
 
   const failing = changes.filter((change) => atLeast(change.severity, options.failOn));
   const incomplete = incompleteSteps(results, reviewError);
@@ -347,7 +349,7 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
     changes,
     errors: errorList(results),
     incomplete: incomplete.filter((step) => step.step !== "connect"),
-    footer: reviewError ? "Review unavailable, so severities are rule-based only." : undefined,
+    footer: reviewError ? "Review unavailable, so severities are rule-based only." : usageLine(reviewed?.usage),
   });
   writeSarif(options, changes, options.lockfile);
 
@@ -366,7 +368,7 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
           complete: incomplete.length === 0,
           incomplete,
           ...(policy ? { policy: { path: policy.path, entries: policy.accept.length, unknownServers: strays.map((entry) => entry.server) } } : {}),
-          ...(options.explain ? { review: { available: reviewError === undefined, error: reviewError } } : {}),
+          ...(options.explain ? { review: { available: reviewError === undefined, error: reviewError, ...reviewed?.usage } } : {}),
         },
         null,
         2,
@@ -380,6 +382,7 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
   out.push(...renderGroups(results, changes, p));
   out.push("", ...footer(changes, failed.length, mode, options, failing.length, incomplete));
   if (reviewError) out.push(p.yellow(`Review unavailable, so severities are rule-based only: ${reviewError}`));
+  else if (reviewed?.usage) out.push(p.dim(usageLine(reviewed.usage)!));
   for (const result of results) {
     if (result.ok && result.probeNote) out.push(p.yellow(`Probe incomplete: ${visible(result.name)} ${visible(result.probeNote)}`));
     if (result.ok && result.packageNote) out.push(p.yellow(`${visible(result.name)}: ${visible(result.packageNote)}`));
@@ -399,16 +402,19 @@ async function diffFiles(options: Options, oldPath: string, newPath: string): Pr
   const after = readLockfile(resolve(options.cwd, newPath));
   const policy = loadPolicy(options);
   const changes = policy ? applyPolicy(diffLockfiles(before, after), policy) : diffLockfiles(before, after);
-  if (options.explain) await review(changes, options, false);
+  const reviewed = options.explain ? await review(changes, options, false) : undefined;
   writeSarif(options, changes, resolve(options.cwd, newPath));
 
   writeReport(options, {
     heading: changes.length ? `mcpkeel: ${plural(changes.length, "change")} (${summaryLine(changes)})` : "mcpkeel: no changes",
     changes,
+    footer: usageLine(reviewed?.usage),
   });
 
   if (options.json) {
-    return print(JSON.stringify({ drift: changes.length > 0, summary: summarize(changes), changes: changes.map(withCodes) }, null, 2));
+    return print(
+      JSON.stringify({ drift: changes.length > 0, summary: summarize(changes), changes: changes.map(withCodes), ...(reviewed?.usage ? { review: reviewed.usage } : {}) }, null, 2),
+    );
   }
   const { p } = options;
   const out: string[] = [p.dim(`old  ${oldPath}`), p.dim(`new  ${newPath}`), ""];
@@ -417,6 +423,7 @@ async function diffFiles(options: Options, oldPath: string, newPath: string): Pr
     out.push(...renderChangesByServer(changes, p));
     out.push("", `${plural(changes.length, "change")}: ${summaryLine(changes)}.`);
   }
+  if (reviewed?.usage) out.push(p.dim(usageLine(reviewed.usage)!));
   return print(out.join("\n"));
 }
 
@@ -536,9 +543,9 @@ function toLockfile(results: SnapshotResult[]): Lockfile {
  * severity. Returns a message when the review could not run and `lenient` says
  * to carry on without it; otherwise a failure is thrown.
  */
-async function review(changes: Change[], options: Options, lenient: boolean): Promise<string | undefined> {
+async function review(changes: Change[], options: Options, lenient: boolean): Promise<{ error?: string; usage?: ReviewUsage & { model: string } }> {
   const targets = reviewable(changes);
-  if (targets.length === 0) return undefined;
+  if (targets.length === 0) return {};
   const reviewer =
     options.provider === "openai"
       ? openaiReviewer({
@@ -557,11 +564,18 @@ async function review(changes: Change[], options: Options, lenient: boolean): Pr
   try {
     applyReviews(targets, await reviewer.review(targets), reviewer);
   } catch (err) {
-    if (lenient && err instanceof UserError) return err.message;
+    if (lenient && err instanceof UserError) return { error: err.message };
     throw err;
   }
   sortChanges(changes);
-  return undefined;
+  return { usage: { model: reviewer.model, ...reviewer.usage } };
+}
+
+/** One line on what the review cost, in tokens as the endpoint reported them. Prices differ by provider, so no money is shown. */
+function usageLine(usage: (ReviewUsage & { model: string }) | undefined): string | undefined {
+  if (!usage || usage.requests === 0) return undefined;
+  const tokens = usage.inputTokens || usage.outputTokens ? `, ${usage.inputTokens} input and ${usage.outputTokens} output tokens` : ", no token counts reported";
+  return `Review by ${visible(usage.model)}: ${plural(usage.requests, "request")}${tokens}, ${(usage.ms / 1000).toFixed(1)} s.`;
 }
 
 const RANK: Record<Severity, number> = { critical: 0, high: 1, medium: 2, low: 3 };
