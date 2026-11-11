@@ -113,3 +113,8 @@ test("the recorder writes feed.json, seeding the nights from the data branch's c
   execFileSync(process.execPath, [join(root, "canary", "record.mjs"), artifact, data, "2026-11-04"], { stdio: "ignore" });
   assert.equal(JSON.parse(readFileSync(join(data, "feed.json"), "utf8")).nights.length, 4);
 });
+
+test("Cloudflare runs the Worker first for /drift, so a browser's navigation does not get the 404 page", () => {
+  const config = JSON.parse(readFileSync(join(root, "site", "wrangler.jsonc"), "utf8").replace(/^\s*\/\/.*$/gm, ""));
+  assert.deepEqual(config.assets.run_worker_first, ["/drift", "/drift/"]);
+});
