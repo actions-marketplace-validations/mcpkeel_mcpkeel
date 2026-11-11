@@ -118,6 +118,7 @@ function makeReviewer() {
 const reviewer = makeReviewer();
 const latencies = [];
 let formatFailures = 0;
+const failures = [];
 
 async function judge(setName, items) {
   // Each run works on copies, so every set starts from the rule-based severities.
@@ -136,17 +137,23 @@ async function judge(setName, items) {
         applyReviews(batch, batch.map((_, index) => ({ index, verdict, reason: "worst case" })), reviewer);
         continue;
       }
-      const started = Date.now();
-      try {
-        const reviews = await reviewer.review(batch);
-        latencies.push(Date.now() - started);
-        formatFailures += batch.length - reviews.length;
-        applyReviews(batch, reviews, reviewer);
-      } catch (err) {
-        // A failed review leaves the rule-based severities, as `verify` does.
-        latencies.push(Date.now() - started);
-        formatFailures += batch.length;
-        process.stderr.write(`  ${setName}: a batch of ${batch.length} failed: ${err.message}\n`);
+      // One retry, counted: a proxy error or an unreadable answer is not the
+      // model's verdict. A batch that fails twice keeps the rule-based
+      // severities, as `verify` does.
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        const started = Date.now();
+        try {
+          const reviews = await reviewer.review(batch);
+          latencies.push(Date.now() - started);
+          formatFailures += batch.length - reviews.length;
+          applyReviews(batch, reviews, reviewer);
+          break;
+        } catch (err) {
+          latencies.push(Date.now() - started);
+          process.stderr.write(`  ${setName}: a batch of ${batch.length} failed (attempt ${attempt}): ${err.message}\n`);
+          failures.push(err.message.slice(0, 80));
+          if (attempt === 2) formatFailures += batch.length;
+        }
       }
       process.stderr.write(".");
     }
@@ -209,6 +216,7 @@ const run = {
     benignRaisedToCritical: pct(m.benign.raisedToCritical, m.benign.n),
     benignLowered: pct(m.benign.lowered, m.benign.n),
     formatFailures,
+    failedRequests: failures.length,
   },
   sets: m,
   usage: {

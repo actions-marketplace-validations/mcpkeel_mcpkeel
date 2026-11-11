@@ -67,11 +67,12 @@ The checks were measured as they stand, not tuned to the benchmark. CI runs `eva
 | `claude-haiku-5.5` | Claude Haiku 5.5 | an OpenAI-compatible proxy, `--provider openai` | 484/485 MCPTox critical, 30/30 rug pulls adversarial, 0 attacks lowered, 0/83 real changes raised, 7/83 lowered; 61 requests, 335,883 input and 30,350 output tokens |
 | `claude-sonnet-5.5` | Claude Sonnet 5.5 | the same proxy | 485/485 MCPTox critical, 28/30 rug pulls adversarial (2 functional), 0 attacks lowered, 0/83 raised, 6/83 lowered; 61 requests, 309,096 input and 30,854 output tokens |
 
+| `claude-opus-5.5` | Claude Opus 5.5 | the same proxy, one retry per failed batch | 475/485 MCPTox adversarial, 29/30 rug pulls adversarial, 0 attacks lowered, 0/83 raised, 8/83 lowered; 10 changes without a verdict. 4 of its 64 requests came back as text mcpkeel could not read as verdicts, so `verify` kept the rule-based severities for them |
 | `gpt-5.6-sol`, sample 100 | GPT-5.6 Sol | the same proxy | 98/100 MCPTox adversarial, 26/30 rug pulls adversarial, 0 attacks lowered, 7/83 real changes raised to critical, 7/83 lowered |
 | `kimi-k3`, sample 100 | Kimi K3 | the same proxy | 93/100 MCPTox adversarial, 30/30 rug pulls adversarial, 0 attacks lowered, 0/83 raised, 10/83 lowered |
 | `composer-2.5`, sample 100 | Cursor Composer 2.5 | `cursor-agent -p --mode ask --sandbox enabled` in an empty workspace, behind a local OpenAI-compatible adapter; Cursor adds its own prompt, so its token counts are not comparable | 88/100 MCPTox adversarial, 30/30 rug pulls adversarial, 0 attacks lowered, 0/83 raised, 6/83 lowered |
 
-The model names are what the proxy was asked for; its routing cannot be checked from outside, and its token counts are its own. Costs are those counts at Claude API list prices. Runs of three more models (DeepSeek 3.2, Claude Opus 5.5, GLM-5) had batches fail, most when the proxy's quota ran out, and are not recorded. A run of `qwen3:4b` on Ollama on a laptop GPU timed out on most batches and is not recorded either. The proxy's token counts for the non-Claude models are its own and are not comparable.
+The model names are what the proxy was asked for; its routing cannot be checked from outside, and its token counts are its own. Costs are those counts at Claude API list prices. Runs of two more models (DeepSeek 3.2, GLM-5) had batches fail, most when the proxy's quota ran out, and are not recorded. A run of `qwen3:4b` on Ollama on a laptop GPU timed out on most batches and is not recorded either. The proxy's token counts for the non-Claude models are its own and are not comparable.
 
 ## The drift feed
 

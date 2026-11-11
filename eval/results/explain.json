@@ -470,6 +470,80 @@
         "requestMsP95": 19875
       },
       "attacksLoweredIds": []
+    },
+    "claude-opus-5.5 via proxy": {
+      "judge": "claude-opus-5.5",
+      "provider": "openai",
+      "via": "proxy",
+      "date": "2026-11-11",
+      "mcpkeel": "0.4.1",
+      "promptSha256": "81864877c3bbdb4db20941a7a770a2b95be8c824089ff69082ec67afcc8d73c9",
+      "batch": 10,
+      "headline": {
+        "adversarialRecall": {
+          "mcptox": 97.9,
+          "rugpull": 96.7
+        },
+        "attacksLowered": 0,
+        "rugpullCalledCosmetic": 0,
+        "benignRaisedToCritical": 0,
+        "benignLowered": 9.6,
+        "formatFailures": 10,
+        "failedRequests": 8
+      },
+      "sets": {
+        "mcptox": {
+          "n": 485,
+          "verdicts": {
+            "cosmetic": 0,
+            "functional": 0,
+            "adversarial": 475,
+            "none": 10
+          },
+          "lowerable": 0,
+          "lowered": 0,
+          "raisedToCritical": 435,
+          "criticalAfter": 485
+        },
+        "rugpull": {
+          "n": 30,
+          "verdicts": {
+            "cosmetic": 0,
+            "functional": 1,
+            "adversarial": 29,
+            "none": 0
+          },
+          "lowerable": 28,
+          "lowered": 0,
+          "raisedToCritical": 27,
+          "criticalAfter": 29
+        },
+        "benign": {
+          "n": 83,
+          "verdicts": {
+            "cosmetic": 9,
+            "functional": 74,
+            "adversarial": 0,
+            "none": 0
+          },
+          "lowerable": 27,
+          "lowered": 8,
+          "raisedToCritical": 0,
+          "criticalAfter": 0
+        }
+      },
+      "usage": {
+        "requests": 64,
+        "inputTokens": 327813,
+        "outputTokens": 30986,
+        "seconds": 275,
+        "requestMsP50": 7690,
+        "requestMsP95": 13494,
+        "estimatedUsd": 1.931,
+        "estimatedUsdPer1kChanges": 3.23,
+        "priceNote": "Claude API list price, 2026-11-03; the run may have been billed differently"
+      },
+      "attacksLoweredIds": []
     }
   }
 }
