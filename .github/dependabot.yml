@@ -47,3 +47,10 @@ updates:
       site:
         patterns: ["*"]
         update-types: [minor, patch]
+    ignore:
+      # Majors are upgraded by hand, as for the CLI: @types/node follows
+      # engines (Node 22), and a TypeScript major changes the compiler.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]
