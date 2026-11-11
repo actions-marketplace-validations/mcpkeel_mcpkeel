@@ -9,14 +9,23 @@ import "./globals.css";
 // Self-hosted, so a visit sends nothing to a font service. Archivo is a
 // variable font with a width axis; the headings use its narrow end.
 const archivo = localFont({
-  src: [
-    { path: "./fonts/archivo-latin-wdth-normal.woff2", style: "normal" },
-    { path: "./fonts/archivo-latin-wdth-italic.woff2", style: "italic" },
-  ],
+  src: "./fonts/archivo-latin-wdth-normal.woff2",
   weight: "100 900",
   declarations: [{ prop: "font-stretch", value: "62% 125%" }],
   variable: "--font-archivo",
   display: "swap",
+});
+
+// The italic is a separate family that is not preloaded: it sets a few
+// words, and preloading it competed with the upright face on slow links.
+const archivoItalic = localFont({
+  src: "./fonts/archivo-latin-wdth-italic.woff2",
+  style: "italic",
+  weight: "100 900",
+  declarations: [{ prop: "font-stretch", value: "62% 125%" }],
+  variable: "--font-archivo-italic",
+  display: "swap",
+  preload: false,
 });
 
 const commitMono = localFont({
@@ -54,7 +63,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${commitMono.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${archivoItalic.variable} ${commitMono.variable}`}>
       <body>
         <a className="skip" href="#main">
           Skip to content
