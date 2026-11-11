@@ -59,16 +59,11 @@
   <div class="hero-body">
     <div class="hero-copy">
       <p class="lede">An MCP server can rewrite the tool descriptions your agent trusts, at any time, and nothing tells you. mcpkeel pins them in a file you commit and fails the build when they change.</p>
-      <ul class="paths" aria-label="Ways to start">
+      <ul class="paths" aria-label="Try it">
         <li>
           <span class="path-label">Try it</span>
           <div class="install"><code>npx mcpkeel demo</code><button type="button" class="copy" data-copy="npx mcpkeel demo">Copy</button></div>
           <span class="path-note">A local server turns malicious and the build fails. No config, no network.</span>
-        </li>
-        <li>
-          <span class="path-label">Use it</span>
-          <div class="install"><code>npx mcpkeel init</code><button type="button" class="copy" data-copy="npx mcpkeel init">Copy</button></div>
-          <span class="path-note">Pins every server in your MCP config into <code>mcp.lock</code>.</span>
         </li>
       </ul>
       <p class="fine">MIT licensed, no account, no telemetry. Releases are signed with npm provenance. Needs Node 22 or later.</p>
@@ -324,8 +319,8 @@ jobs:
 
 <footer class="wrap">
   <div class="install">
-    <code>npx mcpkeel init</code>
-    <button type="button" class="copy" data-copy="npx mcpkeel init">Copy</button>
+    <code>npx mcpkeel demo</code>
+    <button type="button" class="copy" data-copy="npx mcpkeel demo">Copy</button>
   </div>
   <p>Questions and vulnerability reports: <a href="mailto:hello@mcpkeel.app">hello@mcpkeel.app</a>. The package is on <a href="https://www.npmjs.com/package/mcpkeel">npm</a> and the source is on <a href="https://github.com/mcpkeel/mcpkeel">GitHub</a>.</p>
   <p class="fine">mcpkeel is an independent project, MIT licensed. It is not affiliated with any model provider or with the Model Context Protocol project. <a href="/privacy">Privacy</a>.</p>
