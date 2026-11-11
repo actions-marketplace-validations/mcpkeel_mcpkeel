@@ -9,7 +9,10 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // A browser's page navigation to a path with no asset is answered with
+    // the 404 page before the Worker runs, so /drift goes to the Worker first.
+    "run_worker_first": ["/drift", "/drift/"]
   },
   // The zone mcpkeel.app is on this Cloudflare account, so deploying creates
   // the DNS records and certificates for both hostnames.
