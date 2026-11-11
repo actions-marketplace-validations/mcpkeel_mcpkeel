@@ -3,7 +3,7 @@
 //
 // - the security headers, on every response the Worker produces;
 // - on HTML, a Content-Security-Policy with a nonce new for each response,
-//   stamped onto every <script> and <style> tag Next.js wrote.
+//   stamped onto every <script>, <style> and script preload Next.js wrote.
 //
 // Doing this here, rather than in Next.js middleware, keeps the pages
 // prerendered: a nonce in middleware would force every page to render per
@@ -29,7 +29,7 @@ export default {
 
     const url = new URL(request.url);
     // The drift feed changes nightly; a few minutes in a browser's cache is plenty.
-    if (url.pathname === "/drift" && response.ok) headers.set("Cache-Control", "public, max-age=300");
+    if (url.pathname === "/drift") headers.set("Cache-Control", response.ok ? "public, max-age=300" : "no-store");
 
     if (!(headers.get("Content-Type") ?? "").includes("text/html")) {
       return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
@@ -40,6 +40,14 @@ export default {
     headers.delete("Content-Length");
     headers.delete("ETag");
     const html = new Response(response.body, { status: response.status, statusText: response.statusText, headers });
-    return new HTMLRewriter().on("script", new Nonce(nonce)).on("style", new Nonce(nonce)).transform(html);
+    // Script preloads are fetched under script-src too, and 'strict-dynamic'
+    // allows only what carries the nonce, so they get it as well.
+    const stamp = new Nonce(nonce);
+    return new HTMLRewriter()
+      .on("script", stamp)
+      .on("style", stamp)
+      .on('link[rel="preload"][as="script"]', stamp)
+      .on('link[rel="modulepreload"]', stamp)
+      .transform(html);
   },
 } satisfies ExportedHandler<CloudflareEnv>;

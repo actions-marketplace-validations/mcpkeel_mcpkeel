@@ -10,7 +10,7 @@ export function Proof() {
       <ul>
         <li>
           <span className="figure figure-critical">99.8%</span>
-          <span className="label">of 485 poisoned tools from the MCPTox benchmark graded critical with a model review</span>
+          <span className="label">of 485 poisoned tools from the MCPTox benchmark graded critical with a model review, by Claude Haiku 5.5</span>
           <a className="source" href={SITE.measured}>
             How it was measured
           </a>

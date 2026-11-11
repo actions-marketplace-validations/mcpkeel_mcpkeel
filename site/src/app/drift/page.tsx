@@ -29,17 +29,6 @@ function Grade({ counts }: { counts: SeverityCounts }) {
   );
 }
 
-function Unavailable() {
-  return (
-    <main id="main" className="wrap page drift">
-      <h1>MCP drift feed</h1>
-      <p className="lede">
-        The feed could not be read just now. The data is also in the <a href={BRANCH_URL}>canary-data</a> branch.
-      </p>
-    </main>
-  );
-}
-
 function DriftFeed({ feed }: { feed: Feed }) {
   const s = summarize(feed);
   return (
@@ -85,7 +74,7 @@ function DriftFeed({ feed }: { feed: Feed }) {
       </p>
 
       <h2>Nights with changes</h2>
-      <div className="table-scroll">
+      <div className="table-scroll" role="region" aria-label="Nights with changes" tabIndex={0}>
         <table>
           <thead>
             <tr>
@@ -126,7 +115,7 @@ function DriftFeed({ feed }: { feed: Feed }) {
       </div>
 
       <h2>Servers</h2>
-      <div className="table-scroll">
+      <div className="table-scroll" role="region" aria-label="Servers" tabIndex={0}>
         <table>
           <thead>
             <tr>
@@ -159,13 +148,8 @@ function DriftFeed({ feed }: { feed: Feed }) {
   );
 }
 
+// A feed that cannot be read throws, so the response is an error (error.tsx
+// renders the message) and no cache keeps it.
 export default async function DriftPage() {
-  let feed: Feed;
-  try {
-    feed = await loadFeed();
-  } catch (error) {
-    console.error(error);
-    return <Unavailable />;
-  }
-  return <DriftFeed feed={feed} />;
+  return <DriftFeed feed={await loadFeed()} />;
 }

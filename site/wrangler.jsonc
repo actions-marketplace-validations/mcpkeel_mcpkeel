@@ -13,7 +13,6 @@
     "binding": "ASSETS"
   },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "mcpkeel-site" }],
-  "observability": { "enabled": true },
   // The zone mcpkeel.app is on this Cloudflare account, so deploying creates
   // the DNS records and certificates for both hostnames.
   "routes": [

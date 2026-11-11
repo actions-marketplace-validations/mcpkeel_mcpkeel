@@ -37,13 +37,13 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     ".next/types/**/*.ts",
-    "worker.ts",
     "*.config.ts",
-    "cloudflare-env.d.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [
+    ".open-next",
+    "cloudflare-env.d.ts",
     "node_modules",
-    ".open-next"
+    "worker.ts"
   ]
 }

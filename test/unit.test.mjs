@@ -399,3 +399,12 @@ test("the canary records a day's changes, keeps the baseline, and builds the fee
   assert.ok(!existsSync(join(data, "history", "2026-10-13.json")));
   assert.match(readFile(join(data, "README.md"), "utf8"), /Last checked: \*\*2026-10-13\*\*, 1 server\./);
 });
+
+test("the website shows the version being released", () => {
+  // The site's workflow example pins mcpkeel/mcpkeel@v<version>; a release that
+  // forgets site/src/lib/site.ts would leave the site on the old one.
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const { version } = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  const site = readFileSync(join(root, "site", "src", "lib", "site.ts"), "utf8");
+  assert.match(site, new RegExp(`version: "${version.replace(/\./g, "\\.")}"`));
+});

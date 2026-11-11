@@ -116,7 +116,13 @@ export function summarize(feed: Feed): FeedSummary {
  * support only "follow" and "manual", and with "manual" a 3xx is not ok.
  */
 export async function loadFeed(fetcher: typeof fetch = fetch): Promise<Feed> {
-  const response = await fetcher(FEED_URL, { redirect: "manual", cache: "no-store" });
+  // On Workers, `cf.cacheTtl` keeps the feed in Cloudflare's cache for 15
+  // minutes, so most visits do not reach GitHub. Elsewhere it is ignored.
+  const init: RequestInit & { cf?: { cacheTtl: number; cacheEverything: boolean } } = {
+    redirect: "manual",
+    cf: { cacheTtl: 900, cacheEverything: true },
+  };
+  const response = await fetcher(FEED_URL, init);
   if (!response.ok) throw new FeedError(`HTTP ${response.status}`);
   return parseFeed(await response.json());
 }
