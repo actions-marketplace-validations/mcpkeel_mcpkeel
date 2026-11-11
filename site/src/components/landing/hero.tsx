@@ -1,4 +1,8 @@
+import Link from "next/link";
+import { SITE } from "@/lib/site";
 import { CopyCommand } from "../copy-command";
+
+const RELEASED = new Date(`${SITE.released}T00:00:00Z`).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", timeZone: "UTC" });
 
 /** The course line: what was pinned, and where what a server sends today drifts from it. */
 function Course() {
@@ -37,7 +41,10 @@ export function Hero() {
               <span className="path-note">A local server turns malicious and the build fails. No config, no network.</span>
             </li>
           </ul>
-          <p className="fine">MIT licensed, no account, no telemetry. Releases are signed with npm provenance. Needs Node 22 or later.</p>
+          <p className="fine release-line">
+            Version {SITE.version}, released {RELEASED}. MIT licensed, no account, no telemetry, Node 22 or later. Every release is built in CI and
+            signed with npm provenance: <Link href="/security#verify">verify it</Link>.
+          </p>
         </div>
         <ul className="legend" aria-label="How to read the drawing">
           <li>
