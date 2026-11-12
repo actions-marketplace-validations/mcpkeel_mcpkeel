@@ -10,7 +10,7 @@ export const SITE = {
   evidence: "https://github.com/mcpkeel/mcpkeel/blob/main/docs/EVIDENCE.md",
   measured: "https://github.com/mcpkeel/mcpkeel#measured",
   email: "hello@mcpkeel.app",
-  version: "0.5.0",
+  version: "0.6.0",
   // The day that version was published to npm. Update with the version.
   released: "2026-11-11",
   releases: "https://github.com/mcpkeel/mcpkeel/releases",
