@@ -51,6 +51,10 @@ npm audit signatures   # in a project that depends on mcpkeel`}</code>
       <ul className="plain">
         <li>It starts the servers in the MCP config it reads, with the permissions of the job, and connects to the remote ones. On a pull request that is the pull request&apos;s config: give that job no secrets on forks and a read-only token.</li>
         <li>It asks the npm registry, PyPI or an image registry which release each launcher will run. <code>--no-resolve</code> turns this off.</li>
+        <li>
+          When an npm release changed, it reads both releases from that registry, checks each against its pinned digest before reading it, and unpacks
+          it in memory within fixed limits. Nothing in a package is run or written to disk. <code>--no-release-diff</code> turns this off.
+        </li>
         <li>Only with <code>--explain</code>, it sends the changed definitions, and nothing else, to the review endpoint you choose. The key is never handed to the servers it starts.</li>
         <li>
           It refuses remote servers on link-local or cloud metadata addresses, and follows no redirects from servers, registries or the review endpoint.

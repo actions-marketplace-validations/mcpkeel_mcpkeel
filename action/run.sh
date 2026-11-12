@@ -87,10 +87,15 @@ case "$mode" in
     echo "drift=true" >>"$output"
 
     # The report compares the two lockfiles, so no server is contacted again.
+    # --release-diff reads the two releases of any npm package that changed
+    # from the registry, so the pull request shows what code the new one adds.
+    # A `version` input older than 0.6.0 does not have it, and runs without.
+    releases=()
+    case "$(mcpkeel --help 2>/dev/null || true)" in *--release-diff*) releases=(--release-diff) ;; esac
     # If the review cannot run, the report is still written, on the rules alone.
-    if ! with_review diff "$before" "$lockfile" --json --report "$body" ${review[@]+"${review[@]}"} >"$report"; then
+    if ! with_review diff "$before" "$lockfile" ${releases[@]+"${releases[@]}"} --json --report "$body" ${review[@]+"${review[@]}"} >"$report"; then
       : >"$body"
-      mcpkeel diff "$before" "$lockfile" --json --report "$body" >"$report"
+      mcpkeel diff "$before" "$lockfile" ${releases[@]+"${releases[@]}"} --json --report "$body" >"$report"
     fi
     title="$(node -e '
       const r = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));

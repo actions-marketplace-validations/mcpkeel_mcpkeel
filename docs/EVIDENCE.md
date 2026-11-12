@@ -45,6 +45,20 @@ The same lookup for `uvx mcp-server-fetch` on 2026-10-10 returned release 2026.8
 
 End to end, on 2026-10-10: a project with `npx -y @modelcontextprotocol/server-memory` and a lockfile written by 0.2.1 passed `verify` with a note that the package was not pinned yet, `update` added the pin (`2026.8.31`, the digest above), and `verify --probe` passed again.
 
+## What a new release adds
+
+`node eval/releases.mjs`, on 2026-11-11. The 112 archives are the last eight stable releases of 14 MCP servers on npm, pinned by digest in [`eval/data/npm-releases.json`](../eval/data/npm-releases.json) and checked against it before they are read. Counts in [`eval/results/releases.json`](../eval/results/releases.json).
+
+| What | Result |
+| --- | --- |
+| Consecutive real releases graded critical | 0 / 98 |
+| The same servers' latest release with one malicious change injected, graded critical | 95 / 154 |
+| ... the injected line shown to the reviewer, as a signal or an added line | 152 / 154 |
+
+Only signals that fired on none of the 98 real pairs are graded, so the 0 / 98 is in-sample: it was chosen on these pairs, not measured on new ones. Those that did, counted in real pairs: a new dependency in 11, a new host in 7, new email addresses in 1 (`@sentry/mcp-server` 0.48.0, its own ingest addresses and examples), a new IP address in 1 and `new Function` in 1. The injected changes are synthetic: the real `postmark-mcp` releases were taken down from npm.
+
+End to end, on 2026-11-11: `mcpkeel diff --release-diff` on lockfiles pinning the last two releases of `@modelcontextprotocol/server-filesystem` (2.2.0 to 2.3.0), `@playwright/mcp` (0.0.84 to 0.0.85) and `mcp-remote` (0.16.5 to 0.16.6), read from the public registry, reported each as a high release change with no graded signal. For `@playwright/mcp` it listed the four changed lines of `package.json`, all version bumps.
+
 ## The MCPTox benchmark
 
 `node eval/mcptox.mjs`, MCPTox at commit `f85189f`, checked against the digests in the script. Counts in [`eval/results/mcptox.json`](../eval/results/mcptox.json); the benchmark's data is not part of this repository.

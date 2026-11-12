@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0
+
+### Added
+
+- When an npm package's release changes, `verify` reads the old and the new release and reports what the new one adds: install scripts, hidden (BCC) recipients, `child_process`, `eval`, decoded strings, new email addresses, hosts, IP addresses, dependencies and `new Function`, each with its file and line, and the added lines themselves when there are 40 or fewer. The first five make the change critical, as `MK108`. It is the check that would have caught `postmark-mcp` 1.0.16, whose one added line copied every email to an outside address.
+- `eval/releases.mjs` measures it on 98 real consecutive releases of 14 popular MCP servers and on 154 releases with one malicious change injected. No real release is graded critical; 95 of the injected ones are, including all 42 versions of the `postmark-mcp` BCC and its two evasions. CI runs it with `--check`.
+- `--no-release-diff` turns the reading off. `mcpkeel diff <old> <new>` stays offline unless given `--release-diff`; the GitHub Action's `update-pr` mode passes it when its `version` has it, so the pull request shows what each new release adds.
+
+### Security
+
+- The archives are read only from the registry that was asked, checked against their pinned digests before they are read, and unpacked in memory within fixed limits on size and entries. Nothing in a package is run or written to disk.
+
 ## 0.5.0
 
 ### Added
