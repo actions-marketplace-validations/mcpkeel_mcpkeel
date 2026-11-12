@@ -1,0 +1,524 @@
+{
+  "what": "The last stable releases of popular MCP servers on npm, oldest first, with the registry's digest of each. Consecutive releases form the benign pairs of eval/releases.mjs.",
+  "built": "2026-11-12",
+  "packages": [
+    {
+      "name": "@modelcontextprotocol/server-filesystem",
+      "versions": [
+        {
+          "version": "2026.7.10",
+          "integrity": "sha512-Mmjg4anFBD5OzbPnGJOA0jPPN8645ERhQk38HQLpSenx1ox9bfdPkmAzUnNjeQtqQGFLtKe13J20RtLBmUKMZA=="
+        },
+        {
+          "version": "2026.8.31",
+          "integrity": "sha512-kKaFkyAh6oipvc9+EAbJ552JafnMnOq5nzmzWkp1jJdBhTAAGpmIpWihUG1+rfNhmEFM98gUZDdCHCDD4v6a7Q=="
+        },
+        {
+          "version": "1.0.0",
+          "integrity": "sha512-2fN6qhpsiPSBAe0ev1qDPk4sCWdULCZQTuYc4ZY7+BDWQ1XCxLB+7dqStF2ZflgG4G/9vTwQsjxh7pjFqrrpcg=="
+        },
+        {
+          "version": "2.0.0",
+          "integrity": "sha512-JT+bt9wrNIMqhGvOr49vEE9NpbkBxdjQxyLVqh3lYHsB2zGgbzePmDOGrm1glBT1DPR5YvkM6h/NXztWSRhywg=="
+        },
+        {
+          "version": "2.0.1",
+          "integrity": "sha512-K6n1daveB54TybQECAIzSp8DYq014Xfff159OtD1zjB48PONyMcQwyfMPw8jvhZnua/Jd+R/2HcCbTC3YVc3ag=="
+        },
+        {
+          "version": "2.1.0",
+          "integrity": "sha512-BMihuyTNi975iQTQDsZ6x+JVg99CAiX83jBV0wGMyc/0DcBO55ulCQqEzwx7lbG5U9/97XiPP9n0sK/iUtSsEg=="
+        },
+        {
+          "version": "2.2.0",
+          "integrity": "sha512-mNLj/qhV+P4kj1qP8VzgQ2fjSmWcKDQ3Q+KpZEA+WahCDWHw5zJBRQUNSPZ6Ai2/ZGGUjzNzsFpz958a1+4T9A=="
+        },
+        {
+          "version": "2.3.0",
+          "integrity": "sha512-dnwDFqYi2Q3VbFDnVOUme4+81CzwHBj3OKeYEgZ6UkBp7rWSm5OKiidemgIF0kkt5AyAi6mHsqx0cfTZBP1DJQ=="
+        }
+      ]
+    },
+    {
+      "name": "@modelcontextprotocol/server-memory",
+      "versions": [
+        {
+          "version": "2026.1.26",
+          "integrity": "sha512-7F0hbaEB4lVqkYhNWmrC5jJjEWPCofgXd7OIk3h97HyvJL6aTAhlUNYaH8lCDxAzlK9sr2pLCkZEYI+m4HSOiA=="
+        },
+        {
+          "version": "2026.7.4",
+          "integrity": "sha512-D+NNzChsOHN72y58ngDmO+TzjJijGi/sSY/gBydhB3TJCcm1XQEozVWwEpruHeXt/HSkMV3Z/BpHDhdt1MLD5w=="
+        },
+        {
+          "version": "2026.8.31",
+          "integrity": "sha512-ljj/3S4aGjxdNSQWw6gucKKGnTLdBPWxzapyY/MT2tOVyZwvxChvevXSLPwx59nKJAlVpUVW+cOlnVRXRwiqMQ=="
+        },
+        {
+          "version": "1.0.0",
+          "integrity": "sha512-UDMtMrw2xeI16mcn7O4fesp9Pf3hYh91thuU5KSz0BxKqwnTwEytZKjHfkrqxxmKp0r4QHoiEkMV99UmadmODw=="
+        },
+        {
+          "version": "2.0.0",
+          "integrity": "sha512-h+oxQCpK6FOuhlPB9hAcSihAAahcnijuGTZGcXStGOL4UzFYB4ap+pvtSelxchkZlz7tnpY/e0sONaAs24Rurw=="
+        },
+        {
+          "version": "2.0.1",
+          "integrity": "sha512-RbX5cm/OUbvBguVzHhJIqvG15b5K/bLODtQhHeQTkuM6XrijDtCFLl2THgLDg9JnS6pUBomNWq9n5G2bQwxD3A=="
+        },
+        {
+          "version": "2.1.0",
+          "integrity": "sha512-4rhufvmutolbl5O/RflMRenzhYnSh/wij3uMK8H2vuZ2xSGgrA6O2VXwsg/+tSb2UsU1hVDw1XwZ2lcCz8XR2g=="
+        },
+        {
+          "version": "2.1.1",
+          "integrity": "sha512-MbjK6Pi+uGU3EwGk9HyCp/1zKwnuB/QMQ/wQOlswaLgHzIeeCuyVdWUTWg0hTGBk+n+3l5la5a4egbt8YuoVAg=="
+        }
+      ]
+    },
+    {
+      "name": "@modelcontextprotocol/server-everything",
+      "versions": [
+        {
+          "version": "2026.8.18",
+          "integrity": "sha512-sBW2l6uMa9ii78QixTKjXgNSv/Ad6LB8cTGBApJMytHe+VCufLQyME55JbLl/0+fcLmcx93wsZ6ce+0aOF8YXA=="
+        },
+        {
+          "version": "2026.8.31",
+          "integrity": "sha512-5U3OZh8Xq0Li4nA26l6uNvV9/1suMDuWSn+NjLZIhzinhMY6N3A4DCrxVecBGPf2PsNFKTEv5krxGPRwzxc7jQ=="
+        },
+        {
+          "version": "1.0.0",
+          "integrity": "sha512-P5skPTzA76f6FvYxtJMjLmkBVWTga2MqI3xPow7MWrV8sLnviVJ2t63qzm3/UFE0CQLsSUuC6xd3fAsgxcLeBQ=="
+        },
+        {
+          "version": "2.0.0",
+          "integrity": "sha512-Dah6yqdsz4qJ7rolykZM3gobhgyscjewpre/3LO2r0Q0RN4z0FzdhNzK6bJtZuJ2q4qbJL+s2upSUn9KgeSdpg=="
+        },
+        {
+          "version": "2.0.1",
+          "integrity": "sha512-n20owNfIqwwgwhdvadkd2d1rKPLwykLypJLF/52+TXwF1n+gX92LcHWHt22yUYKY5AqbJqmY/m6/N9wz9W03Pw=="
+        },
+        {
+          "version": "2.1.0",
+          "integrity": "sha512-frpLCQv+IgGH+y4gSOcaQRxUBZ7yYZY2xZ5Ve8yz2vubltPfrilDxRTCjPQEk3W8fsaZSdabvagkfs+T6Bf6mw=="
+        },
+        {
+          "version": "2.2.1",
+          "integrity": "sha512-TWTodvhEUbrmwgwfq764Q6L+Azwc1reFGTvb7x3+GtD6JqkyO58TRHk4BBoa8sZcHAi2ePpcbNlGgH7hKRDOLQ=="
+        },
+        {
+          "version": "2.3.0",
+          "integrity": "sha512-GrmmVZxdvy2k7zjM4W0ROAs8Dot8+FrBacGHNI83+c5dePgQORErksMLg0g3BZsxiVLZ7qExdu/QOY2wBbD9Rw=="
+        }
+      ]
+    },
+    {
+      "name": "@modelcontextprotocol/server-sequential-thinking",
+      "versions": [
+        {
+          "version": "2025.7.1",
+          "integrity": "sha512-gEMck99hpP+us6CTGACerxOlCsVL+e53kBev5E64m4yaQhnjIj/+vTttapc7Xc1TsvPnzSmtCwKYvcFPZ0tg/w=="
+        },
+        {
+          "version": "2025.11.25",
+          "integrity": "sha512-E91aiN9uKg8BL0Cw52jRWcGYkGzCEDIdILvyW08JdVte99bLqvSIlT9U0dz24TeZxnxc2Wx9dSdCyMo1mLOeKA=="
+        },
+        {
+          "version": "2025.12.18",
+          "integrity": "sha512-eFR5I9Z9czXQhDn05wahetZU83YNPO+p1HLSEZZEM5q9U1CLF7zv9+TrmSBfRoPaksEAoM8pTWQ33lRCScSFeQ=="
+        },
+        {
+          "version": "2026.7.4",
+          "integrity": "sha512-tmR/ieGaeweffLNBrDp1H1w4sn4M6TN5yWSbMS+YMfS+0GDyPjnNKzqCl2uqfdRiX3D44PJUhwiDGqtJp6tFhw=="
+        },
+        {
+          "version": "2026.8.31",
+          "integrity": "sha512-/EMH++1j2e+VmHwpibw1IUPHxA0tcQY09Yo5/OIPwW/8irEKLAufJNGSZQhCK18n8TUvV6WwZyQOuaDKxe/CeQ=="
+        },
+        {
+          "version": "1.0.0",
+          "integrity": "sha512-ykTmeS4Eejs+FESDrD73mDBNYCkb+cCZJ1MWuv7/vwucbVgGfEbBL5HVt2nVw0/vNF8jz+o9sO/WmxxfXt0J6w=="
+        },
+        {
+          "version": "2.0.0",
+          "integrity": "sha512-LAljkLByTHuOOPoQHAGNX5EiUJAvYuuTG7yEvdK5pRg7s7oxchNh8LwSkcuW3Y8bvQk4uZgjbjH3x7rNKpJ3Iw=="
+        },
+        {
+          "version": "2.1.1",
+          "integrity": "sha512-yvj9eotCoXX7BLmyOKdajnCYB5vgeCS3YwtEU0wCIcVgl+xvCdBtjkd0CTA45Ljh2+Iv1538n28VAnrstps1Tg=="
+        }
+      ]
+    },
+    {
+      "name": "@playwright/mcp",
+      "versions": [
+        {
+          "version": "0.0.78",
+          "integrity": "sha512-XLTUeA6mEN9sQ+hJ4dfG8EIkDbxS0K3Trc2RBkUJuf02TgE2FQRNTMtq/aJfhyRMINsRl/Ybc4sxcWLtFn4/TQ=="
+        },
+        {
+          "version": "0.0.79",
+          "integrity": "sha512-VpqD4a3vFyGQMY9sh3UJiO6wjcurggkljKfAyCHL0QWGY5m6Ehr3MNsAAHPDHO//n13g0PCjpHatAOiulrqdZQ=="
+        },
+        {
+          "version": "0.0.80",
+          "integrity": "sha512-FOPXHm2SvFhAQylm10jMZ35B/SR2TaMLVkavAlwoG4N2qCb5RqbvhQYcu3zmXNyxR2DW0Ooxe+9XPVt5UjKRCQ=="
+        },
+        {
+          "version": "0.0.81",
+          "integrity": "sha512-c4eVex1nS53IzLHlwAm0J9ZISDTvA7RndFX8oVcQOrmvIrKSkByazpq79lZHWJuWTB7Gpk0sLBQoRepyIgmneA=="
+        },
+        {
+          "version": "0.0.82",
+          "integrity": "sha512-OCqftfb8H4dnqm/njbTBRk3seUvUPttOlJUxCtEzXGETYOlRH5Qt3bbXIjmZIuWAxD9RF+yg1ASrPeXvm0y5cA=="
+        },
+        {
+          "version": "0.0.83",
+          "integrity": "sha512-oNcl+Ae2/IAjhfPeP46BfIkSakfmprY+aOtkv5MjrQ4lPav4/yNtPhL0iq8SlIM90oApWgBDUxaNKvktazUKOg=="
+        },
+        {
+          "version": "0.0.84",
+          "integrity": "sha512-weqLrA7/D8MJzNV9/t3Hnjp100tS2sxFXKeb2gH6Nhktqmdfvx5qRA9AZ5Mhjnre1jY0wltsrRK5VZS5NBgcvw=="
+        },
+        {
+          "version": "0.0.85",
+          "integrity": "sha512-bSfECMbLXhJdWkGhLzNMxTZuazG+9IDJ679gflji3yyD94e7ARnGdqmJmG6lTPB+gYX+OiFLmX5myBl62+wZEw=="
+        }
+      ]
+    },
+    {
+      "name": "@upstash/context7-mcp",
+      "versions": [
+        {
+          "version": "4.4.0",
+          "integrity": "sha512-OYwY+t1jvMOWeI8QXuL5oTR84WNQIj6CzjJKZn5Y5Bv4isDOkq/bE6fNzty3oXGkhU1+kHQD42YlodPPEvtgWg=="
+        },
+        {
+          "version": "4.4.1",
+          "integrity": "sha512-HtFuzT7c88ycSzNRrkBRQD4nIYQD6AgQETs2TeKrofFDv6R9RqAYFspopfDq6/OuAnfGZJj5rGrX4whnXbHYLQ=="
+        },
+        {
+          "version": "4.4.2",
+          "integrity": "sha512-cH6N/gyCqtrK9h+FnzyFdWeeufQzfoZ9xXYS3X7IbqktH+NkpFnRkr+VVTNTwdPFAATh4jycuv1QWOXRHN0drQ=="
+        },
+        {
+          "version": "4.4.3",
+          "integrity": "sha512-COt1AT3cStZ1wWZ9u1zThqFiVT/nb4rPdYrgyu3ZT6dwnstUaJpfGztq8EJEL9ZPyu9XlOSX3I/jNIcvSdloog=="
+        },
+        {
+          "version": "4.4.4",
+          "integrity": "sha512-T2DkjhweDnC2mRAclDiTrPG3KI1zYKhhjgY2SMKD9PVrbEaGD8x35VsIOqpwwDc2qiKBvfYCF/jqr+jQMu5PUA=="
+        },
+        {
+          "version": "4.5.0",
+          "integrity": "sha512-BTMM4j2ZuZdAHE1sERUCcty1eRcom4LCE04iv2XIi9b9RKhJKQsXMG7gZLgx7FX5uyyaW6xki7ReuhRM4bphZQ=="
+        },
+        {
+          "version": "4.5.1",
+          "integrity": "sha512-rUD1IdPVihgV8iifD7EvmtdH5X53zwvAUJ1a/ltaIla80m7Nga+lgx5Mk2ckLMF7r5WjDkFfd7qEQ54xbvEwiA=="
+        },
+        {
+          "version": "4.6.0",
+          "integrity": "sha512-V/ve0WbDojzajy7ZwHVi3MRxujeyqvzX1uGO9QZSXuD+WUe2swll1OB3Mv+kI9ZU6fMFkbUM9MUgBA+Hc1j2tA=="
+        }
+      ]
+    },
+    {
+      "name": "@notionhq/notion-mcp-server",
+      "versions": [
+        {
+          "version": "2.3.1",
+          "integrity": "sha512-QYl7Q3351WuNyFDgnK9kfrI2mL3vnq7Gq3bvjjoVBWdJayesTx+8hmmsNj6B+tjCl0ki7BWi4zKQM7mpt0THbw=="
+        },
+        {
+          "version": "2.4.0",
+          "integrity": "sha512-sbroJAFI7iJG97IrCfheTLjgq7qDkg+9y5CPPqMY9LgmzT+q+V1PvG1ONlhrjE6Ph5iIPR59vNkCKfHoXQsHJw=="
+        },
+        {
+          "version": "2.4.1",
+          "integrity": "sha512-D/LixSjTgWi3LrE386yFp+/JHQg768stP5AnWR7SY7p9anDi1NR8Wl6RA4bIKVfLf1kReBVKMbPaDKpM4rm89A=="
+        },
+        {
+          "version": "2.5.0",
+          "integrity": "sha512-h5jDyXRVV8AsXhpAfSHSdAiV2lyfbIHhHfUWMqSdIDl++3PZjYetJdizwhOcTzSfch1V8I/NQOdpNh8DD7JTUg=="
+        },
+        {
+          "version": "2.5.1",
+          "integrity": "sha512-JPG38WoSxYxZMk+fLgqsibU1rhvCSbK1JSMUlw5DPyoc1LveN2cz5C1lbJFcv7mZTa/DAOP4zbfxNj4YtN/lcQ=="
+        },
+        {
+          "version": "2.5.2",
+          "integrity": "sha512-5nPSwHMnugSGAhSJS5vVIlMao+iTJO9HoWGpCnT8lJNrPy3rZMqs1V/CPiN4MuxF+5EBgRE/f/Tirl6Wfi75Mg=="
+        },
+        {
+          "version": "2.6.0",
+          "integrity": "sha512-Curmm/C8v+ZH1NZ2affNMG0+7dBoGppxTWuymnMiHAfv1uPfAcSD5sGKTscaVx0g0nGdZ695rNRQSS++w+ympA=="
+        },
+        {
+          "version": "2.6.1",
+          "integrity": "sha512-CJ83Z6o93d85RbQnJWYlKTdY2vplU02yvHCSIRSGcuQppzeV3roaiuj3yM28v85mOUr6aQgsUR9CrxxTvO62jQ=="
+        }
+      ]
+    },
+    {
+      "name": "@supabase/mcp-server-supabase",
+      "versions": [
+        {
+          "version": "0.10.0",
+          "integrity": "sha512-CVnB+4wBFsQeYwr5phNZyG33nNPUVBAJFB99vn55Z5Zn5+sxopybBPeYtrz8J9rqLkXad/xb7Xow4sz0JMq/XQ=="
+        },
+        {
+          "version": "0.11.0",
+          "integrity": "sha512-++eAgAmq3SAnj3nf2Ic0i2Si9oFmTn9ppEJOioABf7+DZ/w3blPuxLlSTSBZV5+Sf1SdueMpTvYvkKJh0zx+/Q=="
+        },
+        {
+          "version": "0.12.0",
+          "integrity": "sha512-Rjh3k7pQel+vePiffG8m8DkqCT2y3pD9Z4dKejzjACfvrzGeFsaoRhgXoDeZio6kjgOvi8Wy7mgdezEwPklJhg=="
+        },
+        {
+          "version": "0.13.0",
+          "integrity": "sha512-TUzlt0x9eADZgUOz/5wWk95i5GVf1QSnIwYX0jmasNNmoqPxEkAgO/kg8aAQTqmYZx/OPlVlaX3Er5v/le1z2g=="
+        },
+        {
+          "version": "0.14.0",
+          "integrity": "sha512-1ueKg0ZG7ugjdTr1AeKq84pIaJ4xmf3cY6UJ6ZF0SmwIUi7rCIonHKEnC0fj75VgCtq+QPW5HmNFhFuYy87bLA=="
+        },
+        {
+          "version": "0.15.0",
+          "integrity": "sha512-+Zhu0iKjgKfN1gJlGuaQmzjiXvlHtN+LHMj22piHgErC/miWsre+TmLtCH2AVse+n0xB2eehyHhhFQOJbjkCGQ=="
+        },
+        {
+          "version": "0.16.0",
+          "integrity": "sha512-wDOkM4h4hMks9XnFDaiUWtBxNXKjR8vHedTkL9NVuSsg9AE+xt7Tc3JoRclXGiSg3a8RxfGO1W7MfoRJ3dBJHg=="
+        },
+        {
+          "version": "0.16.1",
+          "integrity": "sha512-iMKxko3/chtykeaAq2N7YkE0eeWJOv/zPGbhOFSiOKSIqvIHIDtr82fxTVKA3HP+e0yUu7Y4h+YIcHVh1E+EBg=="
+        }
+      ]
+    },
+    {
+      "name": "firecrawl-mcp",
+      "versions": [
+        {
+          "version": "3.34.0",
+          "integrity": "sha512-tCS5Pn5gmyXuU7kKLV1R4qeHLxdn41/m4LXSOjmX1e6s5AH6R9QS16TmtGdXMt3sI6xMPGzAvahNaHU2bQsiDA=="
+        },
+        {
+          "version": "3.34.1",
+          "integrity": "sha512-ccQgYHk+NDw7bQRkITfwmiqU212HAE8Dll8A4PsIIx8UKBouj11Eu2o06eQoWCVznlqEtjEepQdyyazSyBK7Cg=="
+        },
+        {
+          "version": "3.35.0",
+          "integrity": "sha512-NP0h7l/1eaQ+S7C7V5q5y0mq6aTiDDCZa5rWSXPqpvm/1/+DynamaFD16hcJ5VuKb+7/Vy4LyvMqJ2GoMIB4uQ=="
+        },
+        {
+          "version": "3.36.0",
+          "integrity": "sha512-Td7CHM1zUxV7m/XSYbGWMyf7DpChSq1pblk+YW0o1D5SQykA1W+BRS496mxnHPToIi/4gRBkDVOMKJDQSGQ1tA=="
+        },
+        {
+          "version": "3.36.1",
+          "integrity": "sha512-1X8ni6Rn82H888itDdhtOPlvrpL5hKpwQMpInLHznCQv6KR621AznmM6IbT6Sd/aCrfMfEUKAT40kyhQXyjApg=="
+        },
+        {
+          "version": "3.37.0",
+          "integrity": "sha512-1SVtn+sJnYKmqi8C0WmLOgiVn7UzXKQZwmnoIDGQr5/FW22eI9tHN9eWZLcc6YAtBUxcs7iGrxqbHcmCIcxS8Q=="
+        },
+        {
+          "version": "3.38.0",
+          "integrity": "sha512-eEhSgD7u7iWA0xXMm+0xPzP1VVxVDI78PBdWyVcDG2sxC7GrpUoS7YRS2GxGJyf8UvXVwG7j5gQPjbZeQZJzGA=="
+        },
+        {
+          "version": "3.39.0",
+          "integrity": "sha512-j9lxaJ6ZonHI2JBS4oqW1WWsM6mz3YulOQg9JCNiSJ3TmUUC57iBzw72LekeRD4kTQ3xh90dEzCX0F+rlZKwew=="
+        }
+      ]
+    },
+    {
+      "name": "tavily-mcp",
+      "versions": [
+        {
+          "version": "0.2.15",
+          "integrity": "sha512-CfVVh74pCnErwSQvXIWHOpLnNlMtgt6rtVmVpZ8xUctDmLbTHpUvfDaFMcTWG1dHxNgQiXCmg+GCkUWLqXgKtQ=="
+        },
+        {
+          "version": "0.2.16",
+          "integrity": "sha512-09OL6mNnVIPrMYoqJQIXLVEDCDfJdSXYMqBZum9iBobreniuzF9SA944R/Nbdd/D1l8a+JeXqy7c4bDnLH0SJg=="
+        },
+        {
+          "version": "0.2.17",
+          "integrity": "sha512-ZkcfvxQIPmEMtmLltlXf1/I33bfOMvvExcTnatehceft6NsqQh9E1vbFvkSNQ5mDX+/+vab5EDi7gcULGu6BnQ=="
+        },
+        {
+          "version": "0.2.18",
+          "integrity": "sha512-iJ0JRCTyNiGZzNRED2BouJF7aAKClHFLklRnZ1rLWIf7gpkYcw4PyL8RvMZ57RWCDCEoQ4pjpXuRxPHpSq1yzA=="
+        },
+        {
+          "version": "0.2.19",
+          "integrity": "sha512-mn6koWMQJRhtDFZ6kjW/knD23gBjPufNKNxbPMqe/bbSOkvnlVQgJjg54fkqt7WA9UtVPcmSx/XbcgS7/diDDQ=="
+        },
+        {
+          "version": "0.2.20",
+          "integrity": "sha512-DbbjrsCMF5J/2bBCK+qn60AqtD/NnwTnIRSMKAvlq7ynv8HN4H+rmuNzfYmlPCCGqLR0ebU5xdZw250qsRHt/w=="
+        },
+        {
+          "version": "0.2.21",
+          "integrity": "sha512-FPygYCc1n9NHqSY+TO9jK/NpLS9w8usfZwXjKz64l+IsC06NHf255knEW+HPn4qZHL3JDQ8VOWxMHJVd1g4ing=="
+        },
+        {
+          "version": "0.2.22",
+          "integrity": "sha512-w2pmmmn/JKcNavylDoiNtNPflWt6SK2G1SVUvg0VvdvFJQUaOzEdanAm1VUWBOhUCqmVoBYVPstGcOoWvh8RQQ=="
+        }
+      ]
+    },
+    {
+      "name": "@sentry/mcp-server",
+      "versions": [
+        {
+          "version": "0.37.0",
+          "integrity": "sha512-agZ4KMeYVlTzl4topI6ED6gTmZDtmWZJV4n/nSuoXjNv4i+PNhdx1qJEtTdJdjEh8lPXu1SziEk7zgRCQ4FYbg=="
+        },
+        {
+          "version": "0.38.0",
+          "integrity": "sha512-I8sXI2748YjK1o9g3fs2EAe9g/fZzWpdkRu7ARSziNIv6AE8BOwN31Z1IlPEzzsUtq24bKdRMi8NAEckcCfI5Q=="
+        },
+        {
+          "version": "0.39.0",
+          "integrity": "sha512-sJzFkzka+1wkrCk+v/uWvl3lB0Kcu6Mb/jxlnOZyifJKhTpWv1gF6pJEmAGmf19s2f0ARAw6CsDaYuhGN+I4bw=="
+        },
+        {
+          "version": "0.40.0",
+          "integrity": "sha512-qyoNJ/p0bS0iPNIoJ6Y44Bb0QCi6/pnVzy3EYGcagmdfIIhewlmH7KlXPdT0WrqNx5bCo3Sq8ozTfCOCAT9qpQ=="
+        },
+        {
+          "version": "0.41.0",
+          "integrity": "sha512-rOvmhBLSadjV7s3rSytCiEHTyAT11BFCAW288ZFV6fgQn2w6vNEZNpKv2Wc+643BNu4JzSbfRVV52XMX2/Cnsg=="
+        },
+        {
+          "version": "0.42.0",
+          "integrity": "sha512-KmwfBOUMzJdcxeM9Iv6EN4XEjXbGyopTeKizgQr46pW35NTFTRBddVepZytVITS4pnx5pXj6bRHadSowaaRHQQ=="
+        },
+        {
+          "version": "0.48.0",
+          "integrity": "sha512-VoNth6KfFMLj9BCcsB8R/HUJzPZR3/kJYbGcYIqQ/5GXJaoBBxQq7BmmT7oCmf8EmcEUisaFD0qYNZ+Q+DlHGA=="
+        },
+        {
+          "version": "0.49.0",
+          "integrity": "sha512-pMMJj+MZMDejiVidD3n/acZJMnVrQf+SVdL0frownGAxLM6z7IfHtO6lWk5oT/toRS2piFGMTu7lTEeNQZeFTg=="
+        }
+      ]
+    },
+    {
+      "name": "exa-mcp-server",
+      "versions": [
+        {
+          "version": "3.1.8",
+          "integrity": "sha512-/xa0wGLpX/T1YBP9QynNx25I6iwJndAts8dlIXi26+6+fF6kcHkUA2lVWvAIwHwr8YY6FJ/yEaoejX1b8NaaDA=="
+        },
+        {
+          "version": "3.1.9",
+          "integrity": "sha512-OkH9U5Sq6t3AzdauGgsT3IPtp4g/31UucCnZZUXEO4yHQosvywx6tFrvd2PKq0MJ/vbLZbNFMC7mGeYfGcMURg=="
+        },
+        {
+          "version": "3.2.0",
+          "integrity": "sha512-XK4gPbgfaOX5YRPKDCkdshBGnztSPvrQCzlAHJkQ+z70NsC5DzCOKJ4HvZLRt5wtBSVPbaJJug3fAjVXujJiFA=="
+        },
+        {
+          "version": "3.2.1",
+          "integrity": "sha512-JUcqdfvOh/szKM8iZk//Bm2De4eDiNOud3tZqHSOBK8EgMKJQoXRcLKzWzHLroTwVEfxGL1aB9UdFUiXibV/5A=="
+        },
+        {
+          "version": "3.4.0",
+          "integrity": "sha512-FwcBzmq5sxwwjUKgN4to0gYVxNAWq9oJyG6sbGnVzem07Ca7ufbnXvGPPnoq7QG/Pd40ryzQxD/OCQSbm8FStg=="
+        },
+        {
+          "version": "3.4.1",
+          "integrity": "sha512-X6g4J9LXLJZ0uK52G8KE/KCaxpaD+wkEHzjkoDTYkC+afxfm5xqWgih3i0hgTfyufl6PggkLeR0L6rDAxW6ETg=="
+        },
+        {
+          "version": "3.4.2",
+          "integrity": "sha512-2pqkOuXnABXrwVkB6VyMYA9ywr1aqjBGKlLtcgTBMkWtIn74yY+pMPn8Km2SAGfLeENfWaIHv1L7/kF0b+E5BQ=="
+        },
+        {
+          "version": "3.4.3",
+          "integrity": "sha512-2tHYSFH5BfrsGwbaGqiMLe1yS9Tbr3M0cr7kJwHISF6rdsbjA9dEXH3N8F9YVOHU4mVdPWOel3Pbhyo5rsaxVg=="
+        }
+      ]
+    },
+    {
+      "name": "@heroku/mcp-server",
+      "versions": [
+        {
+          "version": "1.2.7",
+          "integrity": "sha512-5srbdHa8TKr6FSGUBCza054Zx6WQJzfB+Q21WslqWvgvh5y+aY7Qet1fYX/btAKfvAnhsr2hWpl9U5YHhyIzIg=="
+        },
+        {
+          "version": "1.2.8",
+          "integrity": "sha512-4u74Laup1RRMrvyOdXFMH/rMlZUKOF0c8Ood2wGJremSOnNkTJO+P8EGFV3ZNoW+5xwmjPfW+PBMYiFoTciMcg=="
+        },
+        {
+          "version": "1.2.9",
+          "integrity": "sha512-y/qV1By3MAhgOYYh8b8Mab9oWQnB2NZVXFM6xyzaUMl0bkJiifXjkYdYRx9vdFnlTKzpBWNT3+Aync1Typ1jxg=="
+        },
+        {
+          "version": "1.2.10",
+          "integrity": "sha512-+Q8XZmN7FyaNYw5/aqWJy/VmEbkVgZp9kNG9UomHzGI1tWQdmCHG7zpAsasFQ31rkkhsQg3WqLYymm5jOPzy7Q=="
+        },
+        {
+          "version": "1.2.11",
+          "integrity": "sha512-2eM+wkowSHeg9YPPFwhvQ7/bK0UqSob4ItRgGlBEWwGIVa5Hq6ut3lTrM7rUJHBa4vkM7GAPhQVuN0M5fjqabQ=="
+        },
+        {
+          "version": "1.2.12",
+          "integrity": "sha512-W+Xk+dBQCFk5hp8+AMG6GHgBT9gHs5wrML/u2a+WDx0nmBUOWmdPov9I0orRd0UNEWJV5v4yKjzNJRW3GQ/lmQ=="
+        },
+        {
+          "version": "1.2.13",
+          "integrity": "sha512-AbtbUF0i5++OIkkcqL6lx9qeKkTFGnaB3kEztCGDrU44NM6uRt167JlPTrOvYhNU9bB0C1Ggz9TZkaOuSLsuKA=="
+        },
+        {
+          "version": "1.2.14",
+          "integrity": "sha512-QPZXPu8iFD1w+Gy5RVAgLkPnXuUJFH1Yx4awbRzI8F3TsrLwkQ2R0EX/yFKmUSMJtEoIodiZmWyFEYf3wdz1XA=="
+        }
+      ]
+    },
+    {
+      "name": "mcp-remote",
+      "versions": [
+        {
+          "version": "0.15.2",
+          "integrity": "sha512-3PrXMgjJew6xbZH21D7AbtOoHwhvjWt1IY6wepHjKTZLPSkTPifdMVBFuoxsuF6WK6nUlZIgpSj5o5NscJ+XXw=="
+        },
+        {
+          "version": "0.16.0",
+          "integrity": "sha512-LvEbfF8fEjDKPoD+9ELThgaBPAThiq/pEBUfUXmlAZ1oxRiduP+dJ3NQvsaiFbWSoNqfKFoan49i3x9HYvD27g=="
+        },
+        {
+          "version": "0.16.1",
+          "integrity": "sha512-a09YnLKkGafc3nq619LulpWDgii0CODfr9l5liTcX3kEQkrv+LAzA3EJlGHM9a2SjcSe8JsGJQtmufdLfG42Ig=="
+        },
+        {
+          "version": "0.16.2",
+          "integrity": "sha512-xkJjxfEcdg5JVnwScr4m8GGKTaQNrfZZ2B3CvRBpf99gG8GxaVbQMFgnZOSvfG3nxW5yBEhPj8xsuIqPOx1PBg=="
+        },
+        {
+          "version": "0.16.3",
+          "integrity": "sha512-tI77rAor67nYU++kT9+d3p67ndMuWNiep8Gc3rvRsM5WU7Ie0jiXWC4vHX9kuJXB7NaJOd+tdUSUeH+eK2lyQg=="
+        },
+        {
+          "version": "0.16.4",
+          "integrity": "sha512-0SEmhyLkV8qgDc1li1rpWtUaV0jn3D8+ykg/DY7CRwb2J8fMLursxMXOVay7eb7A51wPQJTDtUefkvPajzIhFA=="
+        },
+        {
+          "version": "0.16.5",
+          "integrity": "sha512-HOvAySIYs9hojTHDWUJtKpx1RFi9OHLdJewdkwtOPuybq0uNmYrfeWGBH4mZ1rrIxwkFLJ+7823/96+KbC/4Og=="
+        },
+        {
+          "version": "0.16.6",
+          "integrity": "sha512-QqlBqut/oeDUFwrB/Igs5vGikWSn6h5iM+7TCmiTGJAIuS3OJjzThWGjKLLtAz+NnLozvs2c2wGDkAXpzHepqw=="
+        }
+      ]
+    }
+  ]
+}

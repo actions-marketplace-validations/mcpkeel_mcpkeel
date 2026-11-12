@@ -1,0 +1,20 @@
+{
+  "//": "The Worker entry runs in workerd, not the browser: Workers types instead of the DOM. Generate them with npm run cf-typegen.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "es2023"
+    ],
+    "plugins": [],
+    "incremental": false
+  },
+  "include": [
+    "worker.ts",
+    "cloudflare-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    ".open-next",
+    ".next"
+  ]
+}

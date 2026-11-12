@@ -38,3 +38,33 @@ jobs:
       # wrong. No model runs here; recorded model runs are in
       # eval/results/explain.json.
       - run: node eval/explain.mjs --judge worst --check
+      # What the release diff grades on 98 real releases of popular MCP
+      # servers and 154 with a malicious change injected. The archives are
+      # checked against digests pinned in eval/data/npm-releases.json, so the
+      # cache only saves the download.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: eval/.cache/npm
+          key: npm-releases-${{ hashFiles('eval/data/npm-releases.json') }}
+      - run: node eval/releases.mjs --check
+
+  # The website, its own npm project in site/: lint, types, unit tests, and
+  # the same Workers build Cloudflare deploys.
+  site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - run: npm run cf-typegen
+      - run: npm run lint
+      - run: npm run typecheck   # the app, and worker.ts against the Workers types
+      - run: npm test
+      - run: npm run build:worker

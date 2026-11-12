@@ -34,3 +34,23 @@ updates:
       # TypeScript majors change the compiler; they are upgraded by hand.
       - dependency-name: typescript
         update-types: [version-update:semver-major]
+  # The website. Next.js, React and the Workers adapter move together, so
+  # they come as one pull request.
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    open-pull-requests-limit: 5
+    groups:
+      site:
+        patterns: ["*"]
+        update-types: [minor, patch]
+    ignore:
+      # Majors are upgraded by hand, as for the CLI: @types/node follows
+      # engines (Node 22), and a TypeScript major changes the compiler.
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
+      - dependency-name: typescript
+        update-types: [version-update:semver-major]

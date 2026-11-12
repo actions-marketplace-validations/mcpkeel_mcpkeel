@@ -12,6 +12,7 @@ import { LOCKFILE_NAME, readLockfile, writeLockfile } from "./lockfile.js";
 import { POLICY_NAME, applyPolicy, readPolicy, unknownServers, type Policy } from "./policy.js";
 import { packageRef } from "./resolve.js";
 import { palette, plural, renderChange, renderMarkdown, summarize, summaryLine, type Palette } from "./report.js";
+import { GRADED, inspectRelease, type Signal } from "./release.js";
 import { DEFAULT_MODEL, applyReviews, claudeReviewer, openaiReviewer, reviewable } from "./review.js";
 import type { ReviewUsage } from "./review.js";
 import { visible } from "./scan.js";
@@ -62,6 +63,13 @@ Options
                           runs. By default each one is pinned by version and
                           registry digest, so a new release fails verify even
                           when the definitions stay the same.
+      --no-release-diff   verify: when a package's release changed, do not read the
+                          two releases. By default mcpkeel downloads both from the
+                          registry, checks their digests, and reports what the new
+                          one adds: install scripts, hidden recipients, processes,
+                          eval, decoded strings, and the added lines themselves.
+      --release-diff      diff <old> <new>: read the two releases too (off by
+                          default, so comparing two lockfiles stays offline)
       --sarif <file>      verify, diff: also write the changes as SARIF 2.1.0, for
                           GitHub code scanning. Each carries a stable MK code
                           and its OWASP MCP Top 10 category.
@@ -98,6 +106,10 @@ interface Options {
   policy?: string;
   probe: boolean;
   resolve: boolean;
+  /** verify: read both releases when a package's release changed. */
+  releaseDiff: boolean;
+  /** diff <old> <new>: the same, asked for explicitly. */
+  releaseDiffOffline: boolean;
   force: boolean;
   timeoutMs: number;
   json: boolean;
@@ -136,6 +148,8 @@ async function main(argv: string[]): Promise<number> {
         policy: { type: "string" },
         probe: { type: "boolean" },
         "no-resolve": { type: "boolean" },
+        "no-release-diff": { type: "boolean" },
+        "release-diff": { type: "boolean" },
         force: { type: "boolean" },
         timeout: { type: "string" },
         json: { type: "boolean" },
@@ -177,6 +191,8 @@ async function main(argv: string[]): Promise<number> {
     policy: values.policy ? resolve(cwd, values.policy) : undefined,
     probe: Boolean(values.probe),
     resolve: !values["no-resolve"],
+    releaseDiff: !values["no-release-diff"] && !values["no-resolve"],
+    releaseDiffOffline: Boolean(values["release-diff"]),
     force: Boolean(values.force),
     timeoutMs: timeoutSecs * 1000,
     json: Boolean(values.json),
@@ -315,8 +331,10 @@ async function compare(options: Options, mode: "verify" | "diff"): Promise<numbe
   const { specs, results, configPath } = await snapshot(options);
   keepLockedPins(specs, results, locked, options);
   const failed = results.filter((r) => !r.ok);
-  const changes = diffLockfiles(locked, toLockfile(results), new Set(failed.map((r) => r.name)));
+  const current = toLockfile(results);
+  const changes = diffLockfiles(locked, current, new Set(failed.map((r) => r.name)));
   changes.push(...probeChanges(results));
+  if (options.releaseDiff) changes.push(...(await releaseChanges(changes, locked, current, options)));
   const policy = loadPolicy(options);
   const strays = policy ? unknownServers(policy, locked) : [];
   const kept = policy ? applyPolicy(changes, policy) : changes;
@@ -401,7 +419,9 @@ async function diffFiles(options: Options, oldPath: string, newPath: string): Pr
   const before = readLockfile(resolve(options.cwd, oldPath));
   const after = readLockfile(resolve(options.cwd, newPath));
   const policy = loadPolicy(options);
-  const changes = policy ? applyPolicy(diffLockfiles(before, after), policy) : diffLockfiles(before, after);
+  const found = diffLockfiles(before, after);
+  if (options.releaseDiffOffline) found.push(...(await releaseChanges(found, before, after, options)));
+  const changes = policy ? applyPolicy(found, policy) : found;
   const reviewed = options.explain ? await review(changes, options, false) : undefined;
   writeSarif(options, changes, resolve(options.cwd, newPath));
 
@@ -515,6 +535,67 @@ async function snapshot(options: Options): Promise<{ specs: ServerSpec[]; result
       : false,
   });
   return { specs, results, configPath };
+}
+
+const SIGNAL_LABELS: Record<string, string> = {
+  "install-script": "adds an install script",
+  "hidden-recipient": "adds a hidden (BCC) recipient",
+  "child-process": "starts other programs (child_process)",
+  eval: "runs code with eval()",
+  "decoded-string": "decodes a hidden string",
+  email: "adds an email address",
+  "url-host": "contacts a new host",
+  "ip-address": "contacts an IP address",
+  dependency: "adds a dependency",
+  "dynamic-code": "builds code at run time",
+};
+
+/**
+ * For each npm package whose release changed, read the pinned release and the
+ * one that runs now, and say what the new one adds. Signals that never fire on
+ * real releases of popular servers (eval/releases.mjs) make it critical, as a
+ * change of its own (MK108); the rest are attached to the release change as
+ * context. A release that cannot be read adds a note; the change keeps its
+ * severity and the run is not incomplete.
+ */
+async function releaseChanges(changes: Change[], before: Lockfile, after: Lockfile, options: Options): Promise<Change[]> {
+  const added: Change[] = [];
+  for (const change of changes) {
+    if (change.kind !== "server.package.changed") continue;
+    const from = before.servers[change.server]?.package;
+    const to = after.servers[change.server]?.package;
+    if (!from || !to || from.ecosystem !== "npm" || to.ecosystem !== "npm" || from.name !== to.name) continue;
+    if (!options.json && process.stderr.isTTY) process.stderr.write(options.p.dim(`Reading ${to.name} ${from.version} and ${to.version}…\n`));
+    try {
+      const comparison = await inspectRelease(from, to, { timeoutMs: options.timeoutMs, npmRegistry: env("MCPKEEL_NPM_REGISTRY") });
+      const toInfo = (s: Signal) => ({ kind: s.kind, label: SIGNAL_LABELS[s.kind] ?? s.kind, value: s.value, file: s.file, line: s.line, graded: GRADED.has(s.kind) });
+      const release = {
+        from: from.version,
+        to: to.version,
+        // What grades the change comes first.
+        signals: comparison.added.map(toInfo).sort((a, b) => Number(b.graded) - Number(a.graded)),
+        files: comparison.files,
+        linesAdded: comparison.linesAdded,
+        lines: comparison.lines,
+      };
+      const graded = release.signals.filter((s) => s.graded);
+      if (graded.length) {
+        added.push({
+          severity: "critical",
+          kind: "server.package.risky",
+          server: change.server,
+          subject: change.subject,
+          message: `${to.name}@${to.version} ${[...new Set(graded.map((s) => s.label))].join(", ")}`,
+          release,
+        });
+      } else {
+        change.release = release;
+      }
+    } catch (err) {
+      change.release = { from: from.version, to: to.version, signals: [], note: `the two releases could not be compared: ${(err as Error).message}` };
+    }
+  }
+  return added;
 }
 
 /**

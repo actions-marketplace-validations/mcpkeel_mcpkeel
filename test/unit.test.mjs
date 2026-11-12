@@ -127,6 +127,9 @@ test("a cosmetic verdict lowers only when every mechanical check agrees", () => 
   // Added or removed outright.
   assert.equal(canLower({ ...base, before: undefined, after: "New text." }), false);
   assert.equal(canLower({ ...base, kind: "tool.added", after: "New tool." }), false);
+  // What a new release's code adds is not text a reviewer can call a rewording.
+  assert.equal(canLower({ ...base, kind: "server.package.risky", before: "1.0.15", after: "1.0.16" }), false);
+  assert.equal(canLower({ ...base, kind: "server.package.changed", before: "1.0.15", after: "1.0.16" }), false);
   // A built-in check fired, on this change or on the text as it now stands.
   assert.equal(canLower({ ...base, before, after: "Creates an issue.", flags: [{ id: "x", label: "x", excerpt: "x" }] }), false);
   assert.equal(canLower({ ...base, before: before + " See ~/.ssh/config.", after: "Creates an issue. See ~/.ssh/config." }), false);
@@ -236,10 +239,11 @@ test("no source file contains the invisible characters mcpkeel looks for", () =>
   const offenders = [];
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
-      if (["node_modules", "dist", ".git", "fonts"].includes(name)) continue;
+      // Build output is not source: the site's bundles (.next, .open-next) carry React's own.
+      if (["node_modules", "dist", ".git", "fonts", ".next", ".open-next", ".wrangler"].includes(name)) continue;
       const path = join(dir, name);
       if (statSync(path).isDirectory()) walk(path);
-      else if (/\.(ts|mjs|js|json|md|yml|yaml|html|css|sh)$/.test(name)) {
+      else if (/\.(ts|tsx|mjs|js|json|md|yml|yaml|html|css|sh)$/.test(name)) {
         for (const char of readFileSync(path, "utf8")) {
           const cp = char.codePointAt(0);
           if (ranges.some(([low, high]) => cp >= low && cp <= high)) {
@@ -397,4 +401,13 @@ test("the canary records a day's changes, keeps the baseline, and builds the fee
   run("2026-10-13");
   assert.ok(!existsSync(join(data, "history", "2026-10-13.json")));
   assert.match(readFile(join(data, "README.md"), "utf8"), /Last checked: \*\*2026-10-13\*\*, 1 server\./);
+});
+
+test("the website shows the version being released", () => {
+  // The site's workflow example pins mcpkeel/mcpkeel@v<version>; a release that
+  // forgets site/src/lib/site.ts would leave the site on the old one.
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..");
+  const { version } = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+  const site = readFileSync(join(root, "site", "src", "lib", "site.ts"), "utf8");
+  assert.match(site, new RegExp(`version: "${version.replace(/\./g, "\\.")}"`));
 });
