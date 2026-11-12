@@ -1,0 +1,234 @@
+{
+  "mcpkeel": "0.5.0",
+  "what": "Release comparison on real consecutive releases of popular MCP servers (benign) and on the same releases with one malicious change injected (synthetic, modelled on postmark-mcp and common npm attacks). `critical`: the comparison has a signal mcpkeel grades critical (MK108).",
+  "graded": [
+    "child-process",
+    "decoded-string",
+    "eval",
+    "hidden-recipient",
+    "install-script"
+  ],
+  "benign": {
+    "pairs": 98,
+    "critical": 0,
+    "criticalPairs": []
+  },
+  "malicious": {
+    "total": 154,
+    "critical": 95,
+    "rate": 61.7
+  },
+  "perCase": {
+    "postmark-bcc": {
+      "shape": "Hidden BCC to an outside address (postmark-mcp 1.0.16)",
+      "total": 14,
+      "critical": 14,
+      "lineShown": 14,
+      "signals": [
+        "email",
+        "hidden-recipient"
+      ]
+    },
+    "bcc-concatenated": {
+      "shape": "The same address assembled from pieces",
+      "total": 14,
+      "critical": 14,
+      "lineShown": 14,
+      "signals": [
+        "hidden-recipient"
+      ]
+    },
+    "bcc-base64": {
+      "shape": "The same address decoded from base64",
+      "total": 14,
+      "critical": 14,
+      "lineShown": 14,
+      "signals": [
+        "decoded-string",
+        "hidden-recipient"
+      ]
+    },
+    "env-default-address": {
+      "shape": "An outside address as an environment default",
+      "total": 14,
+      "critical": 0,
+      "lineShown": 14,
+      "signals": [
+        "email"
+      ]
+    },
+    "fetch-env": {
+      "shape": "The environment posted to a new host",
+      "total": 14,
+      "critical": 0,
+      "lineShown": 14,
+      "signals": [
+        "url-host"
+      ]
+    },
+    "ip-exfil": {
+      "shape": "Data sent to a bare IP address",
+      "total": 14,
+      "critical": 0,
+      "lineShown": 14,
+      "signals": [
+        "ip-address"
+      ]
+    },
+    "child-process": {
+      "shape": "A shell command run at startup",
+      "total": 14,
+      "critical": 11,
+      "lineShown": 12,
+      "signals": [
+        "child-process"
+      ]
+    },
+    "eval-loader": {
+      "shape": "Obfuscated code run with eval",
+      "total": 14,
+      "critical": 14,
+      "lineShown": 14,
+      "signals": [
+        "decoded-string",
+        "eval"
+      ]
+    },
+    "function-loader": {
+      "shape": "Obfuscated code run with new Function",
+      "total": 14,
+      "critical": 14,
+      "lineShown": 14,
+      "signals": [
+        "decoded-string",
+        "dynamic-code"
+      ]
+    },
+    "postinstall": {
+      "shape": "An install script added",
+      "total": 14,
+      "critical": 14,
+      "lineShown": 14,
+      "signals": [
+        "install-script"
+      ]
+    },
+    "typosquat-dependency": {
+      "shape": "A look-alike dependency added",
+      "total": 14,
+      "critical": 0,
+      "lineShown": 14,
+      "signals": [
+        "dependency"
+      ]
+    }
+  },
+  "perSignal": {
+    "install-script": {
+      "graded": true,
+      "benign": 0,
+      "benignRate": 0,
+      "malicious": 14,
+      "benignExamples": []
+    },
+    "dependency": {
+      "graded": false,
+      "benign": 11,
+      "benignRate": 11.2,
+      "malicious": 14,
+      "benignExamples": [
+        "@modelcontextprotocol/server-filesystem@1.0.0: zod",
+        "@modelcontextprotocol/server-filesystem@2.0.0: @modelcontextprotocol/server",
+        "@modelcontextprotocol/server-memory@1.0.0: zod",
+        "@modelcontextprotocol/server-memory@2.0.0: @modelcontextprotocol/server",
+        "@modelcontextprotocol/server-everything@2.0.0: @modelcontextprotocol/node",
+        "@modelcontextprotocol/server-everything@2.0.0: @modelcontextprotocol/server",
+        "@modelcontextprotocol/server-everything@2.0.0: @modelcontextprotocol/server-legacy",
+        "@modelcontextprotocol/server-sequential-thinking@1.0.0: zod",
+        "@modelcontextprotocol/server-sequential-thinking@2.0.0: @modelcontextprotocol/server",
+        "@supabase/mcp-server-supabase@0.13.0: @modelcontextprotocol/node",
+        "firecrawl-mcp@3.35.0: @modelcontextprotocol/server",
+        "exa-mcp-server@3.1.9: whoami"
+      ]
+    },
+    "email": {
+      "graded": false,
+      "benign": 1,
+      "benignRate": 1,
+      "malicious": 28,
+      "benignExamples": [
+        "@sentry/mcp-server@0.48.0: 1188a86f3f8168f089450587b00bca66@o1.ingest.us.sentry.io",
+        "@sentry/mcp-server@0.48.0: key@o123.ingest.us.sentry.io",
+        "@sentry/mcp-server@0.48.0: support@sentry.io",
+        "@sentry/mcp-server@0.48.0: jane@personal.dev",
+        "@sentry/mcp-server@0.48.0: jane@acme.com"
+      ]
+    },
+    "hidden-recipient": {
+      "graded": true,
+      "benign": 0,
+      "benignRate": 0,
+      "malicious": 42,
+      "benignExamples": []
+    },
+    "url-host": {
+      "graded": false,
+      "benign": 7,
+      "benignRate": 7.1,
+      "malicious": 14,
+      "benignExamples": [
+        "@supabase/mcp-server-supabase@0.13.0: api.supabase.green",
+        "@supabase/mcp-server-supabase@0.13.0: supabase.green",
+        "@supabase/mcp-server-supabase@0.15.0: xguihxuzqibwxjnimxev.supabase.co",
+        "@supabase/mcp-server-supabase@0.15.0: actixlblmrqglneypada.supabase.co",
+        "firecrawl-mcp@3.38.0: docs.peopledatalabs.com",
+        "tavily-mcp@0.2.18: docs.tavily.com",
+        "@sentry/mcp-server@0.38.0: openid.net",
+        "@sentry/mcp-server@0.38.0: standardschema.dev",
+        "@sentry/mcp-server@0.38.0: raw.githubusercontent.com",
+        "@sentry/mcp-server@0.48.0: s.io",
+        "@sentry/mcp-server@0.48.0: api.github.com",
+        "@sentry/mcp-server@0.48.0: specifications.freedesktop.org"
+      ]
+    },
+    "ip-address": {
+      "graded": false,
+      "benign": 1,
+      "benignRate": 1,
+      "malicious": 14,
+      "benignExamples": [
+        "@sentry/mcp-server@0.38.0: 3.1.1.1"
+      ]
+    },
+    "child-process": {
+      "graded": true,
+      "benign": 0,
+      "benignRate": 0,
+      "malicious": 11,
+      "benignExamples": []
+    },
+    "eval": {
+      "graded": true,
+      "benign": 0,
+      "benignRate": 0,
+      "malicious": 13,
+      "benignExamples": []
+    },
+    "dynamic-code": {
+      "graded": false,
+      "benign": 1,
+      "benignRate": 1,
+      "malicious": 10,
+      "benignExamples": [
+        "@sentry/mcp-server@0.38.0: new Function()"
+      ]
+    },
+    "decoded-string": {
+      "graded": true,
+      "benign": 0,
+      "benignRate": 0,
+      "malicious": 42,
+      "benignExamples": []
+    }
+  }
+}

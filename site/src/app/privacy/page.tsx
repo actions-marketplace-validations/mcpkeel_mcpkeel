@@ -29,6 +29,10 @@ export default function Privacy() {
           the image&apos;s registry which release will run. <code>--no-resolve</code> turns this off.
         </li>
         <li>
+          When an npm package&apos;s release changed, it downloads the old and the new release from the same registry, to read what the new code adds.
+          Nothing in them is run or saved. <code>--no-release-diff</code> or <code>--no-resolve</code> turns this off.
+        </li>
+        <li>
           Only with <code>--explain</code>, it sends the changed tool definitions, and nothing else, to the review endpoint you choose, with the key you
           provide. Your config, environment values and headers are never sent.
         </li>

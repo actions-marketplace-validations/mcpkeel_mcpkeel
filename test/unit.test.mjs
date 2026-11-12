@@ -127,6 +127,9 @@ test("a cosmetic verdict lowers only when every mechanical check agrees", () => 
   // Added or removed outright.
   assert.equal(canLower({ ...base, before: undefined, after: "New text." }), false);
   assert.equal(canLower({ ...base, kind: "tool.added", after: "New tool." }), false);
+  // What a new release's code adds is not text a reviewer can call a rewording.
+  assert.equal(canLower({ ...base, kind: "server.package.risky", before: "1.0.15", after: "1.0.16" }), false);
+  assert.equal(canLower({ ...base, kind: "server.package.changed", before: "1.0.15", after: "1.0.16" }), false);
   // A built-in check fired, on this change or on the text as it now stands.
   assert.equal(canLower({ ...base, before, after: "Creates an issue.", flags: [{ id: "x", label: "x", excerpt: "x" }] }), false);
   assert.equal(canLower({ ...base, before: before + " See ~/.ssh/config.", after: "Creates an issue. See ~/.ssh/config." }), false);

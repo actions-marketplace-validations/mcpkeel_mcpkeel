@@ -1,6 +1,6 @@
 import { flagRule, kindRule } from "./findings.js";
 import { visible } from "./scan.js";
-import type { Change, Severity } from "./types.js";
+import type { Change, ReleaseInfo, Severity } from "./types.js";
 
 export interface Palette {
   bold: (s: string) => string;
@@ -57,12 +57,49 @@ export function renderChange(change: Change, p: Palette): string {
     const tint = verdict === "adversarial" ? p.red : verdict === "functional" ? p.yellow : p.green;
     lines.push(`${INDENT}${p.cyan(`${reviewerName(change)}:`)} ${tint(verdict)}. ${visible(change.review.reason)}${effectNote(change, p)}`);
   }
+  if (change.release) lines.push(...renderRelease(change.release, p));
   // The reason is written by the team, in the repository, but is shown through
   // visible() all the same: it arrives in a pull request like anything else.
   for (const entry of change.policy ?? []) {
     lines.push(`${INDENT}${p.cyan(`Policy ${entry.rule}:`)} ${entry.effect}. ${p.dim(visible(entry.reason))}`);
   }
   return lines.join("\n");
+}
+
+/** "3 files changed, 1 added, 0 removed, 12 lines of code added" */
+function releaseSummary(release: ReleaseInfo): string | undefined {
+  const f = release.files;
+  if (!f) return undefined;
+  return `${plural(f.changed, "file")} changed, ${f.added} added, ${f.removed} removed, ${plural(release.linesAdded ?? 0, "line")} of code added`;
+}
+
+/** A signal's own line, unless the added lines below already show it. */
+function ownLine(release: ReleaseInfo, signal: ReleaseInfo["signals"][number]): string | undefined {
+  if (!signal.line || signal.line === signal.value) return undefined;
+  if (release.lines?.some((line) => line.file === signal.file && line.text === signal.line)) return undefined;
+  return signal.line;
+}
+
+/**
+ * What a new release adds, under its change. Every value and line comes from
+ * the package, so each passes through visible().
+ */
+function renderRelease(release: ReleaseInfo, p: Palette): string[] {
+  const out: string[] = [];
+  if (release.note) return [INDENT + p.yellow(visible(release.note))];
+  const summary = releaseSummary(release);
+  if (summary) out.push(INDENT + p.dim(`${release.from} → ${release.to}: ${summary}`));
+  for (const signal of release.signals) {
+    const tint = signal.graded ? p.magenta : p.yellow;
+    out.push(INDENT + tint(`${signal.graded ? "!" : "+"} ${signal.label}: `) + p.dim(`${visible(signal.value)} (${visible(signal.file)})`));
+    const line = ownLine(release, signal);
+    if (line) out.push(`${INDENT}    ${p.dim(visible(line))}`);
+  }
+  if (release.lines?.length) {
+    out.push(INDENT + p.dim("lines added:"));
+    for (const line of release.lines) out.push(`${INDENT}    ${p.green(`+ ${visible(line.text)}`)} ${p.dim(visible(line.file))}`);
+  }
+  return out;
 }
 
 /** "Claude", or the model that answered, so a report always says who judged. */
@@ -172,6 +209,7 @@ export function renderMarkdown(report: MarkdownReport): string {
             : "";
         out.push(`  - ${escapeMarkdown(reviewerName(change))}: **${change.review.verdict}**. ${escapeMarkdown(change.review.reason)}${effect}`);
       }
+      if (change.release) out.push(...releaseMarkdown(change.release));
       for (const entry of change.policy ?? []) out.push(`  - Policy ${entry.rule}: ${escapeMarkdown(entry.effect)}. ${escapeMarkdown(entry.reason)}`);
     }
     out.push("");
@@ -192,6 +230,24 @@ export function renderMarkdown(report: MarkdownReport): string {
   }
   if (report.footer) out.push(report.footer, "");
   return out.join("\n");
+}
+
+/** What a new release adds, for a pull request body. Package text only ever appears as code. */
+function releaseMarkdown(release: ReleaseInfo): string[] {
+  if (release.note) return [`  - ${escapeMarkdown(release.note)}`];
+  const out: string[] = [];
+  const summary = releaseSummary(release);
+  if (summary) out.push(`  - ${codeSpan(release.from)} → ${codeSpan(release.to)}: ${summary}`);
+  for (const signal of release.signals) {
+    out.push(`  - ${signal.graded ? "**" : ""}${escapeMarkdown(signal.label)}${signal.graded ? "**" : ""}: ${codeSpan(signal.value)} in ${codeSpan(signal.file)}`);
+    const line = ownLine(release, signal);
+    if (line) out.push(...fenced([line]).map((text) => `    ${text}`));
+  }
+  if (release.lines?.length) {
+    out.push("  - Lines added:");
+    out.push(...fenced(release.lines.map((line) => `+ ${line.text}`), "diff").map((line) => `    ${line}`));
+  }
+  return out;
 }
 
 /** Inline code that cannot be closed early by backticks inside the text. */

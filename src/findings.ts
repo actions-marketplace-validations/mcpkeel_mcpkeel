@@ -38,6 +38,7 @@ const KINDS: Record<string, RuleInfo> = {
   "server.version.changed": { code: "MK105", name: "ServerVersionChanged", summary: "The version the server reports changed.", owasp: "MCP04:2025" },
   "server.package.changed": { code: "MK106", name: "PackageReleaseChanged", summary: "The launcher runs a different release of its package.", owasp: "MCP04:2025" },
   "server.package.tampered": { code: "MK107", name: "PackageContentsChanged", summary: "A published release now has different contents.", owasp: "MCP04:2025" },
+  "server.package.risky": { code: "MK108", name: "ReleaseAddsRiskyCode", summary: "A new release adds what a backdoor needs: an install script, a hidden recipient, a process, eval or a decoded string.", owasp: "MCP04:2025" },
   "tool.added": { code: "MK110", name: "ToolAdded", summary: "A tool was added.", owasp: "MCP02:2025" },
   "tool.removed": { code: "MK111", name: "ToolRemoved", summary: "A tool was removed." },
   "tool.description.changed": { code: "MK112", name: "ToolDescriptionChanged", summary: "A tool's description changed.", owasp: "MCP03:2025" },

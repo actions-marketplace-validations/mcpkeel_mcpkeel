@@ -84,6 +84,31 @@ export interface ReviewOutcome {
   effect: "raised" | "lowered" | "kept";
 }
 
+/** One thing a new release adds over the pinned one, found in its code or manifest. */
+export interface ReleaseSignalInfo {
+  kind: string;
+  /** What reads as a sentence in a report, such as "adds an install script". */
+  label: string;
+  value: string;
+  file: string;
+  line?: string;
+  /** Whether this signal makes the change critical (MK108). */
+  graded: boolean;
+}
+
+/** What changed in the code between the pinned release and the one that runs now. */
+export interface ReleaseInfo {
+  from: string;
+  to: string;
+  signals: ReleaseSignalInfo[];
+  files?: { changed: number; added: number; removed: number };
+  linesAdded?: number;
+  /** The added lines themselves, when there are few enough to read. */
+  lines?: { file: string; text: string }[];
+  /** Why the releases could not be compared, when they could not. */
+  note?: string;
+}
+
 export interface Change {
   severity: Severity;
   /** The severity the fixed rules assigned, kept when a review changed it. */
@@ -93,6 +118,8 @@ export interface Change {
   /** Policy entries that applied to this change. */
   policy?: { rule: string; reason: string; effect: string }[];
   review?: ReviewOutcome;
+  /** For a release change: what the new release adds, read from both archives. */
+  release?: ReleaseInfo;
   server: string;
   kind: string;
   subject: string;
